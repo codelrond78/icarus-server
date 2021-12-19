@@ -8,6 +8,6 @@ for br in repo.branches:
     print(br)
 current = repo.head.shorthand
 print('-->', current)
-print(repo.remotes)
-for remote in repo.remotes:
-    print(remote.url)
+print('-->', repo.remotes["origin"].url)
+#for remote in repo.remotes:
+#    print(remote.url)
