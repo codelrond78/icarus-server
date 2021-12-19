@@ -1,2 +1,1 @@
-docker run --rm -it --name code-icarus-back --env PASSWORD=123 -v /var/run/docker.sock:/var/run/docker.sock -v $(pwd):/app/hello -v ~/.ssh:/root/.ssh:ro -p 8081:8080 py38
-#docker run --rm -it --name code --env PASSWORD=123 -v ~/.ssh:/root/.ssh:ro -v settingsv2:/root/.local/share/code-server -v /var/run/docker.sock:/var/run/docker.sock -p 8088:8080 sologo
+docker run --rm -it --name code-icarus-back --env PASSWORD=123 -v settingsv2:/root/.local/share/code-server -v /var/run/docker.sock:/var/run/docker.sock -v $(pwd):/app/hello -v ~/.ssh:/root/.ssh:ro -p 8081:8080 py38
