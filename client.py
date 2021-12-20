@@ -5,7 +5,7 @@ sio = socketio.Client()
 
 @sio.event
 def message(data):
-    print('I received a message!', data)
+    print('-->', data)
 
 @sio.event
 def connect():
@@ -20,4 +20,4 @@ def disconnect():
     print("I'm disconnected!")
 
 sio.connect('http://localhost:5000')
-sio.emit('message', {'foo': 'bar'})
+#sio.emit('message', {'foo': 'bar'})

@@ -25,5 +25,13 @@ def handle_json(msg):
 def test_connect():
     print('connect!')
 
+def f():
+    i = 0
+    while True:
+        socketio.sleep(1)
+        i += 1  
+        socketio.emit('message', str(i))
+
 if __name__ == '__main__':
+    socketio.start_background_task(target=f)
     socketio.run(app, host='0.0.0.0')
