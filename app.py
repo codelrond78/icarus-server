@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, request
 from flask_socketio import SocketIO #, send
 import docker
 import os
@@ -6,7 +6,7 @@ from subprocess import Popen, PIPE, STDOUT
 
 client = docker.from_env()
 
-WORKSPACES_PATH = ''
+WORKSPACES_PATH = '/workspaces'
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'secret!'
@@ -28,6 +28,13 @@ def workspaces():
     #cocinar respuesta con la lista de folders añadiendo el status del contenedor a cada contenedor del workspace
     return []
 
+def post_workspace(name, data):
+    path = os.path.join(WORKSPACES_PATH, name) 
+    os.mkdir(path)
+    with open(os.path.join(path, 'docker-compose.yaml'), 'w') as fout:
+        fout.write(data.decode("utf-8"))
+    return 'ok'
+
 @app.route("/")
 def hello_world():
     return ";)"
@@ -37,8 +44,8 @@ def get_workspaces():
     return get_workspaces()
 
 @app.route('/api/workspaces/<name>', methods=['POST'])
-def post_workspace(name):
-    pass
+def post_workspace_handler(name):
+    return post_workspace(name, request.data)
 
 @app.route('/api/workspace/<name>', methods=['GET', 'PUT', 'DELETE'])
 def handle_workspace(name):
@@ -80,5 +87,5 @@ def containers_status():
 
 if __name__ == '__main__':
     #socketio.start_background_task(target=containers_status)
-    #socketio.run(app, host='0.0.0.0')
-    run(["ls", "-l"])
+    socketio.run(app, host='0.0.0.0')
+    #run(["ls", "-l"])
