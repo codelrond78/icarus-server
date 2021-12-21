@@ -20,6 +20,7 @@ Jinja2==3.0.3
 jsonschema==3.2.0
 MarkupSafe==2.0.1
 paramiko==2.8.1
+pycouchdb==1.14.1
 pycparser==2.21
 pygit2==1.7.2
 PyGithub==1.55
