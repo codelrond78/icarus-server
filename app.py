@@ -1,5 +1,5 @@
 from flask import Flask, request
-from flask_socketio import SocketIO #, send
+from flask_socketio import SocketIO
 import docker
 import os
 from subprocess import Popen, PIPE, STDOUT
@@ -45,8 +45,14 @@ def run(command):
 def workspaces():
     containers = client.containers.list()
     workspaces_folders = os.listdir(WORKSPACES_PATH)
+    workspaces = {}
+    for folder in workspaces_folders:
+        src = os.path.join(WORKSPACES_PATH, folder, "docker-compose.yaml")
+        with open(src, mode='r') as filein:
+            document = filein.read()
+        workspaces[folder] = {"document": document}
     #cocinar respuesta con la lista de folders añadiendo el status del contenedor a cada contenedor del workspace
-    return {"workspaces": workspaces_folders, "status": get_status()}
+    return {"workspaces": workspaces, "status": get_status()}
 
 def create_workspace(name, data):
     path = os.path.join(WORKSPACES_PATH, name) 
@@ -105,6 +111,7 @@ def handle_clone(name_orig, name_dst):
 @socketio.on('connect')
 def test_connect():
     print('connect!')
+    #socketio.emit('status', get_status(), enviar solo a este cliente)
 
 if __name__ == '__main__':
     #socketio.start_background_task(target=containers_status)
