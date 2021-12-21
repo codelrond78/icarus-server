@@ -4,17 +4,17 @@ GET  http://localhost:5000/api/workspaces HTTP/1.1
 GET  http://localhost:5000/api/workspaces/status HTTP/1.1
 
 ###
-
-POST http://localhost:5000/api/workspace/abc/clone/xyz HTTP/1.1
-
-###
-POST http://localhost:5000/api/workspaces/p1 HTTP/1.1
+POST http://localhost:5000/api/workspaces/abc HTTP/1.1
 
 version: "3.9"  # optional since v1.27.0
 services:
   db:
     image: mongo
     ports: ["27017"]
+
+###
+
+POST http://localhost:5000/api/workspace/abc/clone/xyz HTTP/1.1
 
 ###
 

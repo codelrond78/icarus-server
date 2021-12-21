@@ -15,8 +15,10 @@ app.config['SECRET_KEY'] = 'secret!'
 socketio = SocketIO(app)
 
 def create_dirs_from_spec(path, document):
-    for name in load(document)["services"]:
-        path = os.path.join(WORKSPACES_PATH, name) 
+    document = load(document)
+    
+    for name in document["services"]:        
+        path = os.path.join(path, name) 
         os.mkdir(path)    
 
 def get_status():
@@ -58,7 +60,8 @@ def create_workspace(name, data):
     path = os.path.join(WORKSPACES_PATH, name) 
     os.mkdir(path)
     with open(os.path.join(path, 'docker-compose.yaml'), 'w') as fout:
-        fout.write(data.decode("utf-8"))
+        fout.write(data)
+    create_dirs_from_spec(path, data)
     return 'ok'
 
 @app.route("/")
@@ -75,7 +78,7 @@ def get_workspaces():
 
 @app.route('/api/workspaces/<name>', methods=['POST'])
 def post_workspace_handler(name):
-    return create_workspace(name, request.data)
+    return create_workspace(name, request.data.decode("utf-8"))
 
 @app.route('/api/workspace/<name>', methods=['GET', 'PUT', 'DELETE'])
 def handle_workspace(name):
