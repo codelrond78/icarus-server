@@ -12,6 +12,24 @@ socketio = SocketIO(app)
 def hello_world():
     return "<p>Hello, World!</p>"
 
+@app.route('/api/workspaces', methods=['GET', 'POST'])
+def handle_workspaces():
+    if request.method == 'POST':
+        pass
+
+@app.route('/api/workspace/<name>', methods=['GET', 'PUT', 'DELETE'])
+def handle_workspace():
+    if request.method == 'POST':
+        pass
+
+@app.route('/api/workspace/<name>/start', methods=['PUT'])
+def handle_start():
+    pass
+
+@app.route('/api/workspace/<name>/stop', methods=['PUT'])
+def handle_stop():
+    pass
+
 @socketio.on('message')
 def handle_json(msg):
     print('received message: ' + str(msg))
