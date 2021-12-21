@@ -48,7 +48,7 @@ def workspaces():
     #cocinar respuesta con la lista de folders añadiendo el status del contenedor a cada contenedor del workspace
     return {"workspaces": workspaces_folders, "status": get_status()}
 
-def post_workspace(name, data):
+def create_workspace(name, data):
     path = os.path.join(WORKSPACES_PATH, name) 
     os.mkdir(path)
     with open(os.path.join(path, 'docker-compose.yaml'), 'w') as fout:
@@ -69,7 +69,7 @@ def get_workspaces():
 
 @app.route('/api/workspaces/<name>', methods=['POST'])
 def post_workspace_handler(name):
-    return post_workspace(name, request.data)
+    return create_workspace(name, request.data)
 
 @app.route('/api/workspace/<name>', methods=['GET', 'PUT', 'DELETE'])
 def handle_workspace(name):
@@ -97,12 +97,9 @@ def handle_stop(name):
 @app.route('/api/workspace/<name_orig>/clone/<name_dst>', methods=['POST'])
 def handle_clone(name_orig, name_dst):
     src = os.path.join(WORKSPACES_PATH, name_orig, "docker-compose.yaml")
-    dst = os.path.join(WORKSPACES_PATH, name_dst)
-    os.mkdir(dst)
-    copyfile(src, os.path.join(dst, "docker-compose.yaml"))
     with open(src, mode='r') as filein:
-        document = filein.read()
-    create_dirs_from_spec(dst, document)
+        data = filein.read()
+    create_workspace(name_dst, data)
     return 'cloned'
 
 @socketio.on('connect')

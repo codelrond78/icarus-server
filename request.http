@@ -8,23 +8,13 @@ GET  http://localhost:5000/api/workspaces/status HTTP/1.1
 POST http://localhost:5000/api/workspace/abc/clone/xyz HTTP/1.1
 
 ###
-POST http://localhost:5000/api/workspaces/abc HTTP/1.1
+POST http://localhost:5000/api/workspaces/p1 HTTP/1.1
 
 version: "3.9"  # optional since v1.27.0
 services:
-  web:
-    build: .
-    ports:
-      - "5000:5000"
-    volumes:
-      - .:/code
-      - logvolume01:/var/log
-    links:
-      - redis
-  redis:
-    image: redis
-volumes:
-  logvolume01: {}
+  db:
+    image: mongo
+    ports: ["27017"]
 
 ###
 
