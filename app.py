@@ -1,25 +1,52 @@
-from flask import Flask, render_template
-from flask_socketio import SocketIO, send
+from flask import Flask
+from flask_socketio import SocketIO #, send
 import docker
+import os
+from subprocess import Popen, PIPE, STDOUT
 
 client = docker.from_env()
+
+WORKSPACES_PATH = ''
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'secret!'
 socketio = SocketIO(app)
 
+def log_subprocess_output(pipe):
+    for line in iter(pipe.readline, b''): # b'\n'-separated lines
+        print(line)
+
+def run(command):
+    process = Popen(command, stdout=PIPE, stderr=STDOUT)
+    with process.stdout:
+        log_subprocess_output(process.stdout)
+    exitcode = process.wait() # 0 means success
+
+def workspaces():
+    containers = client.containers.list()
+    workspaces_folders = os.list(WORKSPACES_PATH)
+    #cocinar respuesta con la lista de folders añadiendo el status del contenedor a cada contenedor del workspace
+    return []
+
 @app.route("/")
 def hello_world():
-    return "<p>Hello, World!</p>"
+    return ";)"
 
-@app.route('/api/workspaces', methods=['GET', 'POST'])
-def handle_workspaces():
-    if request.method == 'POST':
-        pass
+@app.route('/api/workspaces', methods=['GET'])
+def get_workspaces():
+    return get_workspaces()
+
+@app.route('/api/workspaces/<name>', methods=['POST'])
+def post_workspace(name):
+    pass
 
 @app.route('/api/workspace/<name>', methods=['GET', 'PUT', 'DELETE'])
-def handle_workspace():
-    if request.method == 'POST':
+def handle_workspace(name):
+    if request.method == 'GET':
+        pass
+    elif request.method == 'PUT':
+        pass
+    elif request.method == 'DELETE':
         pass
 
 @app.route('/api/workspace/<name>/start', methods=['PUT'])
@@ -30,6 +57,7 @@ def handle_start():
 def handle_stop():
     pass
 
+"""
 @socketio.on('message')
 def handle_json(msg):
     print('received message: ' + str(msg))
@@ -38,18 +66,19 @@ def handle_json(msg):
     for line in container.logs(stream=True):
         send(line.strip())
     send('fin!')
+"""
 
 @socketio.on('connect')
 def test_connect():
     print('connect!')
 
-def f():
-    i = 0
+def containers_status():
     while True:
-        socketio.sleep(1)
-        i += 1  
-        socketio.emit('message', str(i))
+        socketio.sleep(1)  
+        containers = client.containers.list()
+        socketio.emit('status', list(containers.map(lambda c: {"name": c.name, "status": c.status}), containers))
 
 if __name__ == '__main__':
-    socketio.start_background_task(target=f)
-    socketio.run(app, host='0.0.0.0')
+    #socketio.start_background_task(target=containers_status)
+    #socketio.run(app, host='0.0.0.0')
+    run(["ls", "-l"])
