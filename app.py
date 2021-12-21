@@ -4,6 +4,7 @@ import docker
 import os
 from subprocess import Popen, PIPE, STDOUT
 from shutil import copyfile
+from yaml import load
 
 client = docker.from_env()
 
@@ -12,6 +13,11 @@ WORKSPACES_PATH = '/workspaces'
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'secret!'
 socketio = SocketIO(app)
+
+def create_dirs_from_spec(path, document):
+    for name in load(document)["services"]:
+        path = os.path.join(WORKSPACES_PATH, name) 
+        os.mkdir(path)    
 
 def get_status():
     containers = client.containers.list()
@@ -94,6 +100,9 @@ def handle_clone(name_orig, name_dst):
     dst = os.path.join(WORKSPACES_PATH, name_dst)
     os.mkdir(dst)
     copyfile(src, os.path.join(dst, "docker-compose.yaml"))
+    with open(src, mode='r') as filein:
+        document = filein.read()
+    create_dirs_from_spec(dst, document)
     return 'cloned'
 
 @socketio.on('connect')
