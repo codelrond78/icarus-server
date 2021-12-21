@@ -1,4 +1,8 @@
 
+GET  http://localhost:5000/api/workspaces/status HTTP/1.1
+
+###
+
 POST http://localhost:5000/api/workspaces/abc HTTP/1.1
 
 version: "3.9"  # optional since v1.27.0
@@ -18,3 +22,9 @@ volumes:
   logvolume01: {}
 
 ###
+
+PUT http://localhost:5000/api/workspace/abc/start HTTP/1.1
+
+###
+
+PUT http://localhost:5000/api/workspace/abc/stop HTTP/1.1

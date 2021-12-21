@@ -4,8 +4,12 @@ import socketio
 sio = socketio.Client()
 
 @sio.event
-def message(data):
-    print('-->', data)
+def status(data):
+    print('status --> ', data)
+
+@sio.event
+def log(data):
+    print('log --> ', data)
 
 @sio.event
 def connect():

@@ -12,9 +12,22 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = 'secret!'
 socketio = SocketIO(app)
 
+def get_status():
+    containers = client.containers.list()
+    return list(map(
+        lambda c: {"name": c.name, "status": c.status, "ports":c.ports}, 
+        containers)
+        )
+
+def containers_status():
+    while True:
+        socketio.sleep(1)  
+        socketio.emit('status', get_status())
+
 def log_subprocess_output(pipe):
     for line in iter(pipe.readline, b''): # b'\n'-separated lines
         print(line)
+        socketio.emit('log', line)
 
 def run(command):
     process = Popen(command, stdout=PIPE, stderr=STDOUT)
@@ -39,9 +52,13 @@ def post_workspace(name, data):
 def hello_world():
     return ";)"
 
-@app.route('/api/workspaces', methods=['GET'])
-def get_workspaces():
-    return get_workspaces()
+@app.route('/api/workspaces/status', methods=['GET'])
+def get_workspaces_status():
+    return {"status": get_status()}
+
+#@app.route('/api/workspaces', methods=['GET'])
+#def get_workspaces():
+#    return get_workspaces()
 
 @app.route('/api/workspaces/<name>', methods=['POST'])
 def post_workspace_handler(name):
@@ -57,35 +74,23 @@ def handle_workspace(name):
         pass
 
 @app.route('/api/workspace/<name>/start', methods=['PUT'])
-def handle_start():
-    pass
+def handle_start(name):
+    path = os.path.join(WORKSPACES_PATH, name, "docker-compose.yaml")
+    command = ["docker-compose", "-f", path, "up", "-d"]
+    socketio.start_background_task(run, command)
+    return 'starting...'
 
 @app.route('/api/workspace/<name>/stop', methods=['PUT'])
-def handle_stop():
-    pass
-
-"""
-@socketio.on('message')
-def handle_json(msg):
-    print('received message: ' + str(msg))
-    container = client.containers.run("ubuntu", "echo hello world", detach=True)
-    #container = client.containers.run("hello-world", detach=True)
-    for line in container.logs(stream=True):
-        send(line.strip())
-    send('fin!')
-"""
+def handle_stop(name):
+    path = os.path.join(WORKSPACES_PATH, name, "docker-compose.yaml")
+    command = ["docker-compose", "-f", path, "stop"]
+    socketio.start_background_task(run, command)
+    return 'stopping...'
 
 @socketio.on('connect')
 def test_connect():
     print('connect!')
 
-def containers_status():
-    while True:
-        socketio.sleep(1)  
-        containers = client.containers.list()
-        socketio.emit('status', list(containers.map(lambda c: {"name": c.name, "status": c.status}), containers))
-
 if __name__ == '__main__':
     #socketio.start_background_task(target=containers_status)
     socketio.run(app, host='0.0.0.0')
-    #run(["ls", "-l"])
