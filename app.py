@@ -3,6 +3,7 @@ from flask_socketio import SocketIO #, send
 import docker
 import os
 from subprocess import Popen, PIPE, STDOUT
+from shutil import copyfile
 
 client = docker.from_env()
 
@@ -37,9 +38,9 @@ def run(command):
 
 def workspaces():
     containers = client.containers.list()
-    workspaces_folders = os.list(WORKSPACES_PATH)
+    workspaces_folders = os.listdir(WORKSPACES_PATH)
     #cocinar respuesta con la lista de folders añadiendo el status del contenedor a cada contenedor del workspace
-    return []
+    return {"workspaces": workspaces_folders, "status": get_status()}
 
 def post_workspace(name, data):
     path = os.path.join(WORKSPACES_PATH, name) 
@@ -56,9 +57,9 @@ def hello_world():
 def get_workspaces_status():
     return {"status": get_status()}
 
-#@app.route('/api/workspaces', methods=['GET'])
-#def get_workspaces():
-#    return get_workspaces()
+@app.route('/api/workspaces', methods=['GET'])
+def get_workspaces():
+    return workspaces()
 
 @app.route('/api/workspaces/<name>', methods=['POST'])
 def post_workspace_handler(name):
@@ -86,6 +87,14 @@ def handle_stop(name):
     command = ["docker-compose", "-f", path, "stop"]
     socketio.start_background_task(run, command)
     return 'stopping...'
+
+@app.route('/api/workspace/<name_orig>/clone/<name_dst>', methods=['POST'])
+def handle_clone(name_orig, name_dst):
+    src = os.path.join(WORKSPACES_PATH, name_orig, "docker-compose.yaml")
+    dst = os.path.join(WORKSPACES_PATH, name_dst)
+    os.mkdir(dst)
+    copyfile(src, os.path.join(dst, "docker-compose.yaml"))
+    return 'cloned'
 
 @socketio.on('connect')
 def test_connect():
