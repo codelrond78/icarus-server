@@ -35,13 +35,18 @@ def get_status():
         )
 
 def containers_status():
-    print('comienza el hilo del status')
     status_before = None
+    doc = db.get("icarus-current-status")
+    print(doc["_rev"])
+    
     while True:
         status = get_status()
-        if status != status_before:
-            status_before = status
-            doc = db.save({"status": status, "time": time.time()})
+        #if status != status_before:
+        #    status_before = status
+        #doc["status"] = status
+        print('.')
+        doc = db.save({"_id": "icarus-current-status", "_rev": doc["_rev"], "status": status, "time": time.time()})
+        print('x')
         time.sleep(2)
 
 def log_subprocess_output(pipe):
