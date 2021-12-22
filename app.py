@@ -5,6 +5,12 @@ import os
 from subprocess import Popen, PIPE, STDOUT
 from shutil import copyfile
 from yaml import load
+import threading
+import pycouchdb
+import time
+
+server = pycouchdb.Server("http://admin:123@couchdb:5984/")
+db = server.database("foo2")
 
 client = docker.from_env()
 
@@ -29,9 +35,14 @@ def get_status():
         )
 
 def containers_status():
+    print('comienza el hilo del status')
+    status_before = None
     while True:
-        socketio.sleep(1)  
-        socketio.emit('status', get_status())
+        status = get_status()
+        if status != status_before:
+            status_before = status
+            doc = db.save({"status": status, "time": time.time()})
+        time.sleep(2)
 
 def log_subprocess_output(pipe):
     for line in iter(pipe.readline, b''): # b'\n'-separated lines
@@ -118,4 +129,6 @@ def test_connect():
 
 if __name__ == '__main__':
     #socketio.start_background_task(target=containers_status)
+    x = threading.Thread(target=containers_status)
+    x.start()
     socketio.run(app, host='0.0.0.0')
