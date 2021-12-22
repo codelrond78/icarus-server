@@ -8,6 +8,8 @@ from yaml import load
 import threading
 import pycouchdb
 import time
+import rx
+from rx import operators as ops
 
 server = pycouchdb.Server("http://admin:123@couchdb:5984/")
 db = server.database("foo2")
@@ -34,25 +36,39 @@ def get_status():
         containers)
         )
 
-def containers_status():
+def containers_status():    
     status_before = None
     doc = db.get("icarus-current-status")
-    print(doc["_rev"])
-    
+    i = 0
+
     while True:
         status = get_status()
         #if status != status_before:
         #    status_before = status
-        #doc["status"] = status
-        print('.')
-        doc = db.save({"_id": "icarus-current-status", "_rev": doc["_rev"], "status": status, "time": time.time()})
-        print('x')
-        time.sleep(2)
+        print(i)
+        i += 1
+        doc = db.save({"_id": "icarus-current-status", 
+                           "_rev": doc["_rev"], 
+                           "status": status, 
+                           "time": time.time()
+                           })
+        time.sleep(5)
 
 def log_subprocess_output(pipe):
+    source = rx.subject.Subject()
+    subs = source.pipe(
+        ops.buffer_with_time(2.0)
+    )
+    subs.subscribe(lambda value: socketio.emit('log', value))
+    
     for line in iter(pipe.readline, b''): # b'\n'-separated lines
-        print(line)
-        socketio.emit('log', line)
+        print('-->',line)
+        source.on_next(line)
+    
+    #source.dispose()
+    source.on_completed()
+    print('fin!!!!!!')
+
 
 def run(command):
     process = Popen(command, stdout=PIPE, stderr=STDOUT)
