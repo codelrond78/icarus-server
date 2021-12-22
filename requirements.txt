@@ -13,7 +13,6 @@ docker-compose==1.29.2
 dockerpty==0.4.1
 docopt==0.6.2
 Flask==2.0.2
-Flask-SocketIO==5.1.1
 idna==3.3
 itsdangerous==2.0.1
 Jinja2==3.0.3

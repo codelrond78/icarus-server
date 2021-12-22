@@ -1,5 +1,4 @@
 from flask import Flask, request
-from flask_socketio import SocketIO
 import docker
 import os
 from subprocess import Popen, PIPE, STDOUT
@@ -20,7 +19,6 @@ WORKSPACES_PATH = '/workspaces'
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'secret!'
-socketio = SocketIO(app)
 
 def create_dirs_from_spec(path, document):
     document = load(document)
@@ -36,23 +34,22 @@ def get_status():
         containers)
         )
 
-def containers_status():    
+def containers_status(): 
+    print('starting thread container status...')   
     status_before = None
     doc = db.get("icarus-current-status")
     i = 0
 
     while True:
         status = get_status()
-        #if status != status_before:
-        #    status_before = status
-        print(i)
-        i += 1
-        doc = db.save({"_id": "icarus-current-status", 
-                           "_rev": doc["_rev"], 
-                           "status": status, 
-                           "time": time.time()
-                           })
-        time.sleep(5)
+        if status != status_before:
+            status_before = status
+            doc = db.save({"_id": "icarus-current-status", 
+                            "_rev": doc["_rev"], 
+                            "status": status, 
+                            "time": time.time()
+                            })
+            time.sleep(5)
 
 def log_subprocess_output(pipe, command):
     log = server.database("icarus_log")
@@ -62,23 +59,6 @@ def log_subprocess_output(pipe, command):
                "time": time.time()}
         print('log-->', doc)
         log.save(doc)
-
-"""
-def _log_subprocess_output(pipe):
-    source = rx.subject.Subject()
-    subs = source.pipe(
-        ops.buffer_with_time(2.0)
-    )
-    subs.subscribe(lambda value: socketio.emit('log', value))
-    
-    for line in iter(pipe.readline, b''): # b'\n'-separated lines
-        print('-->',line)
-        source.on_next(line)
-    
-    #source.dispose()
-    source.on_completed()
-    print('fin!!!!!!')
-"""
 
 def run(command):
     process = Popen(command, stdout=PIPE, stderr=STDOUT)
@@ -155,13 +135,5 @@ def handle_clone(name_orig, name_dst):
     create_workspace(name_dst, data)
     return 'cloned'
 
-@socketio.on('connect')
-def test_connect():
-    print('connect!')
-    #socketio.emit('status', get_status(), enviar solo a este cliente)
+x = threading.Thread(target=containers_status).start()
 
-if __name__ == '__main__':
-    #socketio.start_background_task(target=containers_status)
-    x = threading.Thread(target=containers_status)
-    x.start()
-    socketio.run(app, host='0.0.0.0')
