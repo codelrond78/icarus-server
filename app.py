@@ -54,7 +54,17 @@ def containers_status():
                            })
         time.sleep(5)
 
-def log_subprocess_output(pipe):
+def log_subprocess_output(pipe, command):
+    log = server.database("icarus_log")
+    for line in iter(pipe.readline, b''): # b'\n'-separated lines
+        doc = {"command": command,
+               "line": line.decode("utf-8"),
+               "time": time.time()}
+        print('log-->', doc)
+        log.save(doc)
+
+"""
+def _log_subprocess_output(pipe):
     source = rx.subject.Subject()
     subs = source.pipe(
         ops.buffer_with_time(2.0)
@@ -68,12 +78,12 @@ def log_subprocess_output(pipe):
     #source.dispose()
     source.on_completed()
     print('fin!!!!!!')
-
+"""
 
 def run(command):
     process = Popen(command, stdout=PIPE, stderr=STDOUT)
     with process.stdout:
-        log_subprocess_output(process.stdout)
+        log_subprocess_output(process.stdout, command)
     exitcode = process.wait() # 0 means success
 
 def workspaces():
@@ -125,14 +135,16 @@ def handle_workspace(name):
 def handle_start(name):
     path = os.path.join(WORKSPACES_PATH, name, "docker-compose.yaml")
     command = ["docker-compose", "-f", path, "up", "-d"]
-    socketio.start_background_task(run, command)
+    x = threading.Thread(target=run, args=(command,))
+    x.start()
     return 'starting...'
 
 @app.route('/api/workspace/<name>/stop', methods=['PUT'])
 def handle_stop(name):
     path = os.path.join(WORKSPACES_PATH, name, "docker-compose.yaml")
     command = ["docker-compose", "-f", path, "stop"]
-    socketio.start_background_task(run, command)
+    x = threading.Thread(target=run, args=(command,))
+    x.start()
     return 'stopping...'
 
 @app.route('/api/workspace/<name_orig>/clone/<name_dst>', methods=['POST'])
