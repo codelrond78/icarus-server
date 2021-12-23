@@ -7,8 +7,6 @@ from yaml import load
 import threading
 import pycouchdb
 import time
-import rx
-from rx import operators as ops
 
 server = pycouchdb.Server("http://admin:123@couchdb:5984/")
 db = server.database("foo2")
@@ -54,13 +52,27 @@ def containers_status():
 def log_subprocess_output(pipe, command):
     log = server.database("icarus_log")
     for line in iter(pipe.readline, b''): # b'\n'-separated lines
-        doc = {"command": command,
-               "line": line.decode("utf-8"),
-               "time": time.time()}
+        doc = {
+                "line": {
+                    "type": "output",
+                    "text": line.decode("utf-8")
+                },
+               "time": time.time()
+            }
         print('log-->', doc)
         log.save(doc)
 
 def run(command):
+    log = server.database("icarus_log")
+    doc = {
+           "line": {
+               "type": "input",
+               "text": " ".join(command)
+            },
+            "time": time.time()
+        }
+    print('log-->', doc)
+    log.save(doc)
     process = Popen(command, stdout=PIPE, stderr=STDOUT)
     with process.stdout:
         log_subprocess_output(process.stdout, command)
