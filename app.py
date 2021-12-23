@@ -139,13 +139,13 @@ def handle_stop(name):
     x.start()
     return 'stopping...'
 
-@app.route('/api/workspace/<name_orig>/clone/<name_dst>', methods=['POST'])
-def handle_clone(name_orig, name_dst):
+@app.route('/api/workspace/<name_orig>/fork/<name_dst>', methods=['POST'])
+def handle_fork(name_orig, name_dst):
     src = os.path.join(WORKSPACES_PATH, name_orig, "docker-compose.yaml")
     with open(src, mode='r') as filein:
         data = filein.read()
     create_workspace(name_dst, data)
-    return 'cloned'
+    return 'forked'
 
 x = threading.Thread(target=containers_status).start()
 

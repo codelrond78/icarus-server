@@ -14,7 +14,7 @@ services:
 
 ###
 
-POST http://localhost:5000/api/workspace/abc/clone/xyz HTTP/1.1
+POST http://localhost:5000/api/workspace/abc/fork/xyz HTTP/1.1
 
 ###
 
