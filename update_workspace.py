@@ -60,5 +60,5 @@ def get_workspace_containers(docker_client, workspace):
     containers = []
     for c in docker_client.containers.list():
         if c.name.startswith(workspace):
-            containers.append(c)
+            containers.append({"name": c.name, "status": c.status, "ports": get_ports(c.ports)})
     return containers

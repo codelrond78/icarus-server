@@ -26,7 +26,9 @@ def test_0():
 
     db.save.assert_called_with({"_id": 'a', 
                                 "_rev": "_123", 
-                                "containers": containers
+                                "containers": [{'name': 'a_1', 'status': 'running', 'ports': ('8080',)}, 
+                                               {'name': 'a_2', 'status': 'running', 'ports': ('3000',)}
+                                              ]
                                 })
 
     
