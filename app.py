@@ -7,9 +7,11 @@ from yaml import load
 import threading
 import pycouchdb
 import time
+from update_workspace import update
 
 server = pycouchdb.Server("http://admin:123@couchdb:5984/")
 db = server.database("foo2")
+workspaces_db = server.database("workspaces")
 
 client = docker.from_env()
 
@@ -34,11 +36,13 @@ def get_status():
 
 def containers_status(): 
     print('starting thread container status...')   
-    status_before = None
-    doc = db.get("icarus-current-status")
-    i = 0
+    status_before = []
+    #doc = db.get("icarus-current-status")
 
     while True:
+        status_before = update(client, db, status_before)
+        time.sleep(5)
+        """
         status = get_status()
         if status != status_before:
             status_before = status
@@ -47,7 +51,8 @@ def containers_status():
                             "status": status, 
                             "time": time.time()
                             })
-            time.sleep(5)
+        time.sleep(5)
+        """
 
 def log_subprocess_output(pipe, command):
     log = server.database("icarus_log")
