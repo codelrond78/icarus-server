@@ -91,7 +91,7 @@ def test_get_workspace_containers_no_contains():
 def test_no_workspaces():
     status_before = [{'name': 'a_1', 'status': 'running', 'ports': ('8080',)}]
     db = MagicMock()
-    db.temporary_query.return_value = []
+    db.query.return_value = []
     db.get.return_value = {
                            "_rev": "_123",                            
                           }
@@ -109,7 +109,7 @@ def test_no_workspaces():
 def test_not_called():
     status_before = [{'name': 'a_1', 'status': 'running', 'ports': ('8080',)}]
     db = MagicMock()
-    db.temporary_query.return_value = ['a']
+    db.query.return_value = [{'id': '234cdc1e178d313fc46468e37e0024bc', 'key': 'a', 'value': {'description': 'una prueba ;)', 'containers': []}}]
     db.get.return_value = {
                            "_rev": "_123",                            
                           }
@@ -127,7 +127,7 @@ def test_not_called():
 def test_called():
     status_before = [{'name': 'a_1', 'status': 'stopped', 'ports': ('8080',)}, {'name': 'a_2', 'status': 'running', 'ports': ('3000',)}]
     db = MagicMock()
-    db.temporary_query.return_value = ['a']
+    db.query.return_value = [{'id': '234cdc1e178d313fc46468e37e0024bc', 'key': 'a', 'value': {'description': 'una prueba ;)', 'containers': []}}]
     db.get.return_value = {
                            "_rev": "_123",                            
                           }

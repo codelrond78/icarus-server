@@ -1,26 +1,9 @@
 import pycouchdb
+
 server = pycouchdb.Server("http://admin:123@couchdb:5984/")
+map_func = "function(doc) { emit({doc.name, doc.containers}, 1); }"
+db = server.database("workspaces")
 
-#db = server.create("foo2")
-db = server.database("foo2")
+result = list(map(lambda x: x, db.query("testing/all_workspaces")))
 
-#doc = db.save({"name": "bar"})
-
-"""
-_doc = {
-    "_id": "_design/testing",
-    "views": {
-        "names": {
-            "map": "function(doc) { emit(doc, 1); }",
-            "reduce": "function(k, v) { return  sum(v); }",
-        }
-    }
-}
-
-db.save(_doc)
-"""
-
-result = list(db.query("testing/names", group='true'))
 print(result)
-#print(server.info()['version'])
-#
