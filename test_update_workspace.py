@@ -1,5 +1,8 @@
 from unittest.mock import MagicMock
-from update_workspace import update, get_diff_status, get_updated_containers, get_workspaces_needed_to_be_updated
+from update_workspace import update, get_diff_status, \
+                             get_updated_containers, \
+                             get_workspaces_needed_to_be_updated, \
+                             get_workspace_containers
 
 class Container:
     def __init__(self, name, status, ports):
@@ -58,6 +61,17 @@ def test_ws_needed_to_be_updated_empty_2():
     workspaces = ['a']
     containers = []
     assert get_workspaces_needed_to_be_updated(workspaces, containers) == []
+
+def test_get_workspace_containers():
+    containers = [Container('a_1', 'running', {'-': [{"HostPort": "8080"}]})]
+    
+    docker_client = MagicMock()
+    docker_client.containers.list.return_value = containers
+
+    assert get_workspace_containers(docker_client, 'a') == [{"name": "a_1",
+                                                             "status": "running",
+                                                             "ports": ("8080",)
+                                                            }]
 
 def test_not_called():
     status_before = [{'name': 'a_1', 'status': 'running', 'ports': ('8080',)}]
