@@ -73,6 +73,32 @@ def test_get_workspace_containers():
                                                              "ports": ("8080",)
                                                             }]
 
+def test_get_workspace_containers_no_contains():
+    containers = [Container('a_1', 'running', {'-': [{"HostPort": "8080"}]})]
+    
+    docker_client = MagicMock()
+    docker_client.containers.list.return_value = containers
+
+    assert get_workspace_containers(docker_client, 'b') == []
+
+def test_no_workspaces():
+    status_before = [{'name': 'a_1', 'status': 'running', 'ports': ('8080',)}]
+    db = MagicMock()
+    db.temporary_query.return_value = []
+    db.get.return_value = {
+                           "_rev": "_123",                            
+                          }
+
+    containers = [Container('a_1', 'running', {'-': [{"HostPort": "8080"}]})]
+    
+    docker_client = MagicMock()
+    docker_client.containers.list.return_value = containers
+
+    status = update(docker_client, db, status_before)
+    
+    db.save.assert_not_called    
+    assert status == [{'name': 'a_1', 'status': 'running', 'ports': ('8080',)}]
+
 def test_not_called():
     status_before = [{'name': 'a_1', 'status': 'running', 'ports': ('8080',)}]
     db = MagicMock()
@@ -86,9 +112,10 @@ def test_not_called():
     docker_client = MagicMock()
     docker_client.containers.list.return_value = containers
 
-    update(docker_client, db, status_before)
-
+    status = update(docker_client, db, status_before)
+    
     db.save.assert_not_called    
+    assert status == [{'name': 'a_1', 'status': 'running', 'ports': ('8080',)}]
 
 def test_called():
     status_before = [{'name': 'a_1', 'status': 'stopped', 'ports': ('8080',)}, {'name': 'a_2', 'status': 'running', 'ports': ('3000',)}]
@@ -105,7 +132,7 @@ def test_called():
     docker_client = MagicMock()
     docker_client.containers.list.return_value = containers
 
-    update(docker_client, db, status_before)
+    status = update(docker_client, db, status_before)
 
     db.save.assert_called_with({"_id": 'a', 
                                 "_rev": "_123", 
@@ -113,5 +140,7 @@ def test_called():
                                                {'name': 'a_2', 'status': 'running', 'ports': ('3000',)}
                                               ]
                                 })
-
+    assert status == [{'name': 'a_1', 'status': 'running', 'ports': ('8080',)},
+                      {'name': 'a_2', 'status': 'running', 'ports': ('3000',)}
+                     ]
     
