@@ -47,7 +47,7 @@ def get_diff_status(status_before, status_after):
     return list(set(status_before) ^ set(status_after))
 
 def get_updated_containers(diff):
-    return [dict(c)["name"] for c in diff]
+    return list(set([dict(c)["name"] for c in diff]))
 
 def get_ports(raw_ports):
     ports = set()
