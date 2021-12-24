@@ -1,5 +1,5 @@
 from unittest.mock import MagicMock
-from update_workspace import update, get_diff_status, get_updated_containers
+from update_workspace import update, get_diff_status, get_updated_containers, get_workspaces_needed_to_be_updated
 
 class Container:
     def __init__(self, name, status, ports):
@@ -44,6 +44,10 @@ def test_diff_one_is_deleted():
     diff = get_diff_status(status_before, status_after) 
     assert get_updated_containers(diff) == ['a_1']
 
+def test_ws_needed_to_be_update():
+    workspaces = ['a', 'b']
+    containers = ['a_1']
+    assert get_workspaces_needed_to_be_updated(workspaces, containers) == ['a']
 
 def test_not_called():
     status_before = [{'name': 'a_1', 'status': 'running', 'ports': ('8080',)}]
