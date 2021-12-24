@@ -49,6 +49,16 @@ def test_ws_needed_to_be_update():
     containers = ['a_1']
     assert get_workspaces_needed_to_be_updated(workspaces, containers) == ['a']
 
+def test_ws_needed_to_be_updated_empty():
+    workspaces = []
+    containers = []
+    assert get_workspaces_needed_to_be_updated(workspaces, containers) == []
+
+def test_ws_needed_to_be_updated_empty_2():
+    workspaces = ['a']
+    containers = []
+    assert get_workspaces_needed_to_be_updated(workspaces, containers) == []
+
 def test_not_called():
     status_before = [{'name': 'a_1', 'status': 'running', 'ports': ('8080',)}]
     db = MagicMock()
