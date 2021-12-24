@@ -54,7 +54,7 @@ def get_ports(raw_ports):
     for k, v in raw_ports.items():
         for p in v:
             ports.add(p["HostPort"])
-    return tuple(ports)
+    return tuple(sorted(ports))
 
 def get_workspace_containers(docker_client, workspace):
     containers = []

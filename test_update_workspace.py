@@ -2,13 +2,20 @@ from unittest.mock import MagicMock
 from update_workspace import update, get_diff_status, \
                              get_updated_containers, \
                              get_workspaces_needed_to_be_updated, \
-                             get_workspace_containers
+                             get_workspace_containers, \
+                             get_ports
 
 class Container:
     def __init__(self, name, status, ports):
         self.name = name
         self.status = status
         self.ports = ports
+
+def test_get_ports():
+    assert get_ports({'-': [{"HostPort": "8080"}]}) == ("8080", )
+
+def test_get_ports_several_order():
+    assert get_ports({'-': [{"HostPort": "8080"}, {"HostPort": "3000"}]}) == ("3000", "8080")
 
 def test_diff_empty():
     status_before = []
