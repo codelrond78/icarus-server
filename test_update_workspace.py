@@ -1,11 +1,49 @@
 from unittest.mock import MagicMock
-from update_workspace import update
+from update_workspace import update, get_diff_status, get_updated_containers
 
 class Container:
     def __init__(self, name, status, ports):
         self.name = name
         self.status = status
         self.ports = ports
+
+def test_diff_empty():
+    status_before = []
+    status_after = []
+
+    diff = get_diff_status(status_before, status_after) 
+    assert get_updated_containers(diff) == []
+
+def test_diff_one_is_empty():
+    status_before = []
+    status_after = [{'name': 'a_1', 'status': 'stopped', 'ports': ('8080',)}]
+
+    diff = get_diff_status(status_before, status_after) 
+    assert get_updated_containers(diff) == ['a_1']
+
+def test_diff_a_1():
+    status_before = [{'name': 'a_1', 'status': 'running', 'ports': ('8080',)}]
+    status_after = [{'name': 'a_1', 'status': 'stopped', 'ports': ('8080',)}]
+
+    diff = get_diff_status(status_before, status_after) 
+    assert get_updated_containers(diff) == ['a_1']
+
+def test_diff_new_container():
+    status_before = [{'name': 'a_1', 'status': 'running', 'ports': ('8080',)}]
+    status_after = [{'name': 'a_1', 'status': 'running', 'ports': ('8080',)}, 
+                    {'name': 'b_1', 'status': 'running', 'ports': ('3000',)}
+    ]
+
+    diff = get_diff_status(status_before, status_after) 
+    assert get_updated_containers(diff) == ['b_1']
+
+def test_diff_one_is_deleted():
+    status_before = [{'name': 'a_1', 'status': 'running', 'ports': ('8080',)}]
+    status_after = []
+
+    diff = get_diff_status(status_before, status_after) 
+    assert get_updated_containers(diff) == ['a_1']
+
 
 def test_not_called():
     status_before = [{'name': 'a_1', 'status': 'running', 'ports': ('8080',)}]
