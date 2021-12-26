@@ -11,7 +11,8 @@ def update(docker_client, db, status_before):
     return status
 
 def get_all_workspaces(db):
-    return list(map(lambda x: x["key"], db.query("example/viewMyWorkspaces")))
+    #return list(map(lambda x: x["id"], db.query("example/viewMyWorkspaces")))
+    return [x['id'] for x in db.query("example/viewMyWorkspaces") ]
 
 def get_workspaces_needed_to_be_updated(all_workspaces, containers_updated):
     workspaces = []
@@ -30,7 +31,7 @@ def update_workspace(workspace, docker_client, db):
     doc = db.get(workspace)
     doc = db.save({"_id": workspace, 
                    "_rev": doc["_rev"], 
-                   #"description": doc["description"],
+                   "description": doc["description"],
                    "containers": containers
                   })
 
