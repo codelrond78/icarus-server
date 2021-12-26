@@ -127,10 +127,11 @@ def test_not_called():
 def test_called():
     status_before = [{'name': 'a_1', 'status': 'stopped', 'ports': ('8080',)}, {'name': 'a_2', 'status': 'running', 'ports': ('3000',)}]
     db = MagicMock()
-    db.query.return_value = [{'id': 'a', 'key': 'a', 'value': {'description': 'una prueba ;)', 'containers': []}}]
+    db.query.return_value = [{'id': 'a', 'key': 'a', 'value': {"specification": {"version": "3"}, 'description': 'una prueba ;)', 'containers': []}}]
     db.get.return_value = {
                            "_rev": "_123",                            
-                           "description": "abc"
+                           "description": "abc",
+                           "specification": {"version": "3"}
                           }
 
     containers = [Container('a_1', 'running', {'-': [{"HostPort": "8080"}]}),
@@ -145,6 +146,7 @@ def test_called():
     db.save.assert_called_with({"_id": 'a', 
                                 "_rev": "_123", 
                                 "description": "abc",
+                                "specification": {"version": "3"},
                                 "containers": [{'name': 'a_1', 'status': 'running', 'ports': ('8080',)}, 
                                                {'name': 'a_2', 'status': 'running', 'ports': ('3000',)}
                                               ]
