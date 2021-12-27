@@ -13,9 +13,9 @@ const docker = new Docker({ socketPath: '/var/run/docker.sock' })
 
 const password = '123';
 
-const localLog = new PouchDB('localLog');
-const remoteLog = new PouchDB(`http://admin:${password}@localhost:5984/icarus_log`);
-
+//const localLog = new PouchDB('localLog');
+const remoteLog = new PouchDB(`http://admin:${password}@couchdb:5984/icarus_log`);
+/*
 localLog.sync(remoteLog, {
     live: true,
     retry: true,
@@ -24,7 +24,7 @@ localLog.sync(remoteLog, {
 }).on('error', function (err) {
     console.log('err en log:', err)
 });
-
+*/
 const localWorkspaces = new PouchDB('localWorkspaces')
 const remoteWorkspaces = new PouchDB(`http://admin:${password}@couchdb:5984/workspaces`)
 
@@ -76,14 +76,23 @@ router.get('/', (ctx, next) => {
 .post('/api/workspaces/:name', async (ctx, next) => {
     try{
         const name = ctx.request.params.name;
-        const ret = yaml.load(ctx.request.body.specification)
+        const description = ctx.request.body.description;
+        const specification = yaml.load(ctx.request.body.specification);
         doc = {
             "line": {
                 "type": "input",
                 "text": `create-workspace ${name}`
             }
         }
-        await localLog.post(doc);
+        await remoteLog.post(doc);
+        await remoteWorkspaces.post({
+            _id: name,
+            type: "workspace",
+            description: description,
+            specification: specification,
+            status: "-",
+            containers: []
+        });
         ctx.body = doc;
     }catch(err){
         console.log('error', err);
