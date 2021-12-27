@@ -23,3 +23,13 @@ PUT http://localhost:5000/api/workspace/abc/start HTTP/1.1
 ###
 
 PUT http://localhost:5000/api/workspace/abc/stop HTTP/1.1
+
+###
+
+POST http://localhost:3001/api/workspaces/abc HTTP/1.1
+content-type: application/json
+
+{
+  "description": "una descripción cualquiera",
+  "specification": "'version': '3'"
+}

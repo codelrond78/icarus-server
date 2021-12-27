@@ -1,6 +1,9 @@
 const Koa = require('koa');
+const bodyParser = require('koa-bodyparser');
+const Router = require('koa-router');
 const PouchDB = require('pouchdb');
 const {Docker} = require('node-docker-api');
+const yaml = require('js-yaml');
 
 const docker = new Docker({ socketPath: '/var/run/docker.sock' })
 
@@ -51,11 +54,28 @@ docker.events({
   .catch(error => console.log(error))
 
 const app = new Koa();
+const router = new Router();
+app.use(bodyParser());
 
+router.get('/', (ctx, next) => {
+    ctx.body = 'Hello World!';
+})
+.post('/api/workspaces/:name', (ctx, next) => {
+    console.log(ctx.request.body);
+    const ret = yaml.load(ctx.request.body.specification)
+    ctx.body = ret;
+});
+
+app
+  .use(router.routes())
+  .use(router.allowedMethods());
+
+/*
 app.use(async ctx => {
     ret = await f();
     ctx.body = ret;
 });
+*/
 
 console.log('listening on 3001...')
 app.listen(3001);
