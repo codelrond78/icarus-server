@@ -46,5 +46,5 @@ content-type: application/json
 
 {
   "description": "una descripción cualquiera v2",
-  "specification": "'version': '4.v2'"
+  "specification": "version: \"3\"\nservices:\n  db:\n    image: mongo\n"
 }

@@ -1,3 +1,4 @@
+const PouchDB = require('pouchdb');
 const {Docker} = require('node-docker-api');
 
 const docker = new Docker({ socketPath: '/var/run/docker.sock' })
@@ -9,25 +10,40 @@ function getPorts(raw){
             ports.add(port.HostPort)
         }
     }
-    return ports;
+    return Array.from(ports);
 }
 
 async function updateWorkspaceFromContainer(status, name, ports, localWorkspaces){
-    const workspaces = await localWorkspaces.allDocs();
+    let workspaces = await localWorkspaces.allDocs({
+        include_docs: true
+    });
+    workspaces = workspaces.rows;
     
+    if(name.startsWith("/")){
+        name = name.substring(1)
+    }
+
     for(let workspace of workspaces){
-        if(name.startsWith(workspace._id)){
-            let containers = workspace.containers.filter(function(c){ 
+        console.log('match?', name, workspace.id);
+        if(name.startsWith(workspace.id)){
+            console.log(workspace)
+            let containers = workspace.doc.containers.filter(function(c){ 
                 return c.name != name;
             });
             if(status === 'destroy'){
                 //
             }else{
                 containers = [...containers, {name, status, ports}];
-            }            
-            localWorkspaces.put(
-                {...workspace, containers}
-            );
+            } 
+            console.log('localWorkspace.put');
+            console.log({...workspace.doc, containers})
+            try{
+                localWorkspaces.put(
+                    {...workspace.doc, containers}
+                );
+            }catch(err){
+                console.log(err)
+            }
             break;
         }
     }    
@@ -38,6 +54,12 @@ const promisifyStream = (stream, workspacesDB) => new Promise((resolve, reject) 
         let json = JSON.parse(data.toString());        
         let status = json.status;
         let name = json.Actor.Attributes.name;
+
+        //workspacesDB.allDocs().then(x=>console.log(x));
+        
+        //console.log('name', name)
+        //console.log('status', status);
+
         if(json.status === 'destroy'){    
             updateWorkspaceFromContainer(status, name, null, workspacesDB)
             console.log({
@@ -48,11 +70,12 @@ const promisifyStream = (stream, workspacesDB) => new Promise((resolve, reject) 
         else if(json.status === 'start'){ 
             try{
                 docker.container.get(json.id).status().then(container => {
-                    updateWorkspaceFromContainer(status, name, null, workspacesDB)
+                    const ports = getPorts(container.data.NetworkSettings.Ports) 
+                    updateWorkspaceFromContainer(status, name, ports, workspacesDB)
                     console.log({
                         status: container.data.State.Status,
                         name: container.data.Name,
-                        ports: getPorts(container.data.NetworkSettings.Ports)
+                        ports
                     })
                 });
             }catch(err){
@@ -72,4 +95,18 @@ function f(workspacesDB){
       .catch(error => console.log(error))
 }
 
-f()
+const localWorkspaces = new PouchDB('localWorkspaces');
+const remoteWorkspaces = new PouchDB(`http://admin:123@couchdb:5984/workspaces`)
+
+localWorkspaces.sync(remoteWorkspaces, {
+    live: true,
+    retry: true,
+    filter: 'example/myWorkspaces',
+}).on('change', function (change) {
+    console.log(change)
+}).on('error', function (err) {
+    console.log('err en log:', err)
+});
+
+console.log('comenzamos')
+f(localWorkspaces)
