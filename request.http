@@ -26,25 +26,25 @@ PUT http://localhost:5000/api/workspace/abc/stop HTTP/1.1
 
 ### 3001 version node
 
-POST http://localhost:3001/api/workspaces/xyz2 HTTP/1.1
+POST http://localhost:3001/api/workspaces/winki HTTP/1.1
 content-type: application/json
 
 {
-  "description": "una descripción cualquiera",
-  "specification": "'version': '4'"
+  "description": "winki es mi amigo",
+  "specification": "version: \"3\"\nservices:\n  db:\n    image: mongo\n"
 }
 
 ###
-PUT http://localhost:3001/api/workspace/xyz2/stop HTTP/1.1
+PUT http://localhost:3001/api/workspace/winki/stop HTTP/1.1
 
 ###
-PUT http://localhost:3001/api/workspace/xyz2/start HTTP/1.1
+PUT http://localhost:3001/api/workspace/winki/start HTTP/1.1
 
 ###
-PUT http://localhost:3001/api/workspaces/xyz2 HTTP/1.1
+PUT http://localhost:3001/api/workspaces/winki HTTP/1.1
 content-type: application/json
 
 {
-  "description": "una descripción cualquiera v2",
+  "description": "winki yujuuu!!",
   "specification": "version: \"3\"\nservices:\n  db:\n    image: mongo\n"
 }
