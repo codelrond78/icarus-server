@@ -3,9 +3,16 @@ const {Docker} = require('node-docker-api');
  
 const promisifyStream = stream => new Promise((resolve, reject) => {
     stream.on('data', data => {
-        let json = JSON.parse(data.toString());
-        if(json.status === 'start' || json.status === 'stop' || json.status === 'destroy'){
-            console.log(json)
+        let json = JSON.parse(data.toString());        
+        if(json.status === 'destroy'){
+            console.log(json);
+        }
+        else if(json.status === 'start'){ //|| json.status === 'stop' /*|| json.status === 'destroy'*/){
+            //console.log(json)
+            docker.container.get(json.id).status().then(container => {
+                //console.log(container);
+                console.log(container.data.NetworkSettings.Ports)
+            });
         }        
     })
     stream.on('end', resolve)
