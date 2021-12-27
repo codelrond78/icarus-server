@@ -4,6 +4,7 @@ const Router = require('koa-router');
 const PouchDB = require('pouchdb');
 const {Docker} = require('node-docker-api');
 const yaml = require('js-yaml');
+const {run, stop, createWorkspace} = require('./commands');
 
 const docker = new Docker({ socketPath: '/var/run/docker.sock' })
 
@@ -75,11 +76,23 @@ app.use(bodyParser());
 router.get('/', (ctx, next) => {
     ctx.body = 'Icarus!';
 })
+.put('/api/workspace/:name/run', async (ctx, next) => {
+    const name = ctx.request.params.name;
+    run(name, remoteLog);
+    ctx.body = {"status": "starting"};
+})
+.put('/api/workspace/:name/stop', async (ctx, next) => {
+    const name = ctx.request.params.name;
+    stop(name, remoteLog);
+    ctx.body = {"status": "stopping"};
+})
 .post('/api/workspaces/:name', async (ctx, next) => {
     try{
         const name = ctx.request.params.name;
         const description = ctx.request.body.description;
         const specification = yaml.load(ctx.request.body.specification);
+        
+        createWorkspace(name, specification, ctx.request.body.specification);       
         doc = {
             "line": {
                 "type": "input",

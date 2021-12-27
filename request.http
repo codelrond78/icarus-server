@@ -33,3 +33,6 @@ content-type: application/json
   "description": "una descripción cualquiera",
   "specification": "'version': '4'"
 }
+
+###
+PUT http://localhost:3001/api/workspace/xyz2/stop HTTP/1.1
