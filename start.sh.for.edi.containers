@@ -1,0 +1,23 @@
+#!/bin/bash
+
+DIR="."
+
+cd /app/hello
+
+if [ -d "$DIR" ]
+then
+        if [ "$(ls -A $DIR)" ]; then
+           echo "Dir is not Empty"
+        else
+           echo "$DIR is Empty"
+           if [ -z ${REPO+x} ]; then 
+               echo "No repo given"
+           else 
+               git clone $REPO .
+           fi
+        fi
+else
+        echo "Directory $DIR not found."
+fi
+
+code-server --auth password --bind-addr 0.0.0.0:8080 /app/hello
