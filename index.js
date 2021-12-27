@@ -38,6 +38,7 @@ filter: 'example/myWorkspaces',
     console.log('err en log:', err)
 });
 
+/*
 async function f(){
     try{
         const docs = await localWorkspaces.allDocs();
@@ -48,6 +49,7 @@ async function f(){
     }      
     console.log('done');
 }
+*/
  
 const promisifyStream = stream => new Promise((resolve, reject) => {
     stream.on('data', data => {
@@ -85,7 +87,7 @@ router.get('/', (ctx, next) => {
             }
         }
         await remoteLog.post(doc);
-        await remoteWorkspaces.post({
+        await localWorkspaces.post({
             _id: name,
             type: "workspace",
             description: description,
