@@ -52,6 +52,7 @@ router.get('/', (ctx, next) => {
     await remoteLog.post(doc);
     w = await localWorkspaces.get(name);
     await localWorkspaces.put({...w, description, specification});
+    ctx.body = {put: 'ok'};
 /*        _id: name,
         _rev: w._rev,
         type: "workspace",
@@ -68,15 +69,21 @@ router.get('/', (ctx, next) => {
         const specification = yaml.load(ctx.request.body.specification);
         
         createWorkspace(name, specification, ctx.request.body.specification);       
-        doc = {
+        await remoteLog.post({
             "line": {
                 "type": "input",
                 "text": `create-workspace ${name}`
             }
-        }
-        await remoteLog.post(doc);
-        await localWorkspaces.post({...w, description, specification, status: '-', containers: []});
-        ctx.body = doc;
+        });
+        await localWorkspaces.post({
+            _id: name, 
+            type: "workspace",
+            description, 
+            specification, 
+            status: '-', 
+            containers: []
+        });
+        ctx.body = {post: 'ok'};
     }catch(err){
         console.log('error', err);
         ctx.body = {"error": err};

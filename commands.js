@@ -20,7 +20,7 @@ function updateWorkspace(name, specification, raw){
         }
     });
     const dirs = directoriesInDIrectory(myPath);
-    for(let name of specification.services){
+    for(let name of Object.keys(specification.services)){
         if(!dirs.includes(name)) {
             fs.mkdirSync(path.join(myPath, name));
         }   
@@ -38,7 +38,7 @@ function createWorkspace(name, specification, raw){
           return
         }
     });
-    for(let name of specification.services){
+    for(let name of Object.keys(specification.services)){
         fs.mkdirSync(path.join(myPath, name));
     }
 }
