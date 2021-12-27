@@ -4,6 +4,22 @@ const { spawn } = require("child_process");
     
 const WORKSPACES_PATH = '/workspaces';
 
+function updateWorkspace(name, specification, raw){
+
+    myPath = path.join(WORKSPACES_PATH, name);
+    //fs.mkdirSync(myPath);
+    fs.writeFileSync(path.join(myPath, 'docker-compose.yaml'), raw, err => {
+        if (err) {
+          console.error(err)
+          return
+        }
+    });
+    //for(let name of specification.services){
+    //    fs.mkdirSync(path.join(wpath, name));
+    //}
+}
+
+
 function createWorkspace(name, specification, raw){
 
     myPath = path.join(WORKSPACES_PATH, name);
@@ -69,5 +85,6 @@ function stop(name, db){
 module.exports = {
     run,
     stop,
-    createWorkspace
+    createWorkspace,
+    updateWorkspace
 }

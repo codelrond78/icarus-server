@@ -4,7 +4,7 @@ const Router = require('koa-router');
 const PouchDB = require('pouchdb');
 const {Docker} = require('node-docker-api');
 const yaml = require('js-yaml');
-const {run, stop, createWorkspace} = require('./commands');
+const {run, stop, createWorkspace, updateWorkspace} = require('./commands');
 
 const docker = new Docker({ socketPath: '/var/run/docker.sock' })
 
@@ -85,6 +85,31 @@ router.get('/', (ctx, next) => {
     const name = ctx.request.params.name;
     stop(name, remoteLog);
     ctx.body = {"status": "stopping"};
+})
+.put('/api/workspaces/:name', async (ctx, next) => {
+    const name = ctx.request.params.name;
+    const description = ctx.request.body.description;
+    const specification = yaml.load(ctx.request.body.specification);
+    
+    updateWorkspace(name, specification, ctx.request.body.specification);
+    doc = {
+        "line": {
+            "type": "input",
+            "text": `update-workspace ${name}`
+        }
+    }
+    await remoteLog.post(doc);
+    w = await localWorkspaces.get(name);
+    await localWorkspaces.post({
+        _id: name,
+        _rev: w._rev,
+        type: "workspace",
+        description: description,
+        specification: specification,
+        status: w.status,
+        containers: w.containers
+    });
+
 })
 .post('/api/workspaces/:name', async (ctx, next) => {
     try{
