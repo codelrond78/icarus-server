@@ -1,18 +1,40 @@
 const fs = require('fs');
 const {Docker} = require('node-docker-api');
- 
+
+function getPorts(raw){
+    console.log(raw)
+    let ports = new Set();
+    for (let [key, value] of Object.entries(raw)) {
+        console.log(key, value);
+        for(let port of value){
+            console.log(port);
+            ports.add(port.HostPort)
+        }
+    }
+    return ports;
+}
+
 const promisifyStream = stream => new Promise((resolve, reject) => {
     stream.on('data', data => {
         let json = JSON.parse(data.toString());        
         if(json.status === 'destroy'){
-            console.log(json);
-        }
-        else if(json.status === 'start'){ //|| json.status === 'stop' /*|| json.status === 'destroy'*/){
-            //console.log(json)
-            docker.container.get(json.id).status().then(container => {
-                //console.log(container);
-                console.log(container.data.NetworkSettings.Ports)
+            console.log({
+                status: json.status,
+                name: json.Actor.Attributes.name
             });
+        }
+        else if(json.status === 'start'){ 
+            try{
+                docker.container.get(json.id).status().then(container => {
+                    console.log({
+                        status: container.data.State.Status,
+                        name: container.data.Name,
+                        ports: getPorts(container.data.NetworkSettings.Ports)
+                    })
+                });
+            }catch(err){
+                console.log(err)
+            }
         }        
     })
     stream.on('end', resolve)
