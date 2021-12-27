@@ -1,4 +1,4 @@
-const PouchDB = require('pouchdb');
+//const PouchDB = require('pouchdb');
 const {Docker} = require('node-docker-api');
 
 const docker = new Docker({ socketPath: '/var/run/docker.sock' })
@@ -35,8 +35,7 @@ async function updateWorkspaceFromContainer(status, name, ports, localWorkspaces
             }else{
                 containers = [...containers, {name, status, ports}];
             } 
-            console.log('localWorkspace.put');
-            console.log({...workspace.doc, containers})
+
             try{
                 localWorkspaces.put(
                     {...workspace.doc, containers}
@@ -54,11 +53,6 @@ const promisifyStream = (stream, workspacesDB) => new Promise((resolve, reject) 
         let json = JSON.parse(data.toString());        
         let status = json.status;
         let name = json.Actor.Attributes.name;
-
-        //workspacesDB.allDocs().then(x=>console.log(x));
-        
-        //console.log('name', name)
-        //console.log('status', status);
 
         if(json.status === 'destroy'){    
             updateWorkspaceFromContainer(status, name, null, workspacesDB)
@@ -95,6 +89,7 @@ function f(workspacesDB){
       .catch(error => console.log(error))
 }
 
+/*
 const localWorkspaces = new PouchDB('localWorkspaces');
 const remoteWorkspaces = new PouchDB(`http://admin:123@couchdb:5984/workspaces`)
 
@@ -110,3 +105,4 @@ localWorkspaces.sync(remoteWorkspaces, {
 
 console.log('comenzamos')
 f(localWorkspaces)
+*/
