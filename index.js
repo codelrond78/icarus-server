@@ -4,6 +4,7 @@ const Router = require('koa-router');
 const PouchDB = require('pouchdb');
 const yaml = require('js-yaml');
 const {run, stop, createWorkspace, updateWorkspace} = require('./commands');
+const {dockerListener} = require('./dockerevents');
 
 const password = '123';
 const remoteLog = new PouchDB(`http://admin:${password}@couchdb:5984/icarus_log`);
@@ -93,6 +94,9 @@ router.get('/', (ctx, next) => {
 app
   .use(router.routes())
   .use(router.allowedMethods());
+
+console.log('start docker event listener...');
+dockerListener()
 
 console.log('listening on 3001...')
 app.listen(3001);

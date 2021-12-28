@@ -81,12 +81,16 @@ const promisifyStream = (stream, workspacesDB) => new Promise((resolve, reject) 
     stream.on('error', reject)
 })
 
-function f(workspacesDB){
+function dockerListener(workspacesDB){
     docker.events({
         since: ((new Date().getTime() / 1000) - 60).toFixed(0)
     })
       .then(stream => promisifyStream(stream, workspacesDB))
       .catch(error => console.log(error))
+}
+
+module.exports = {
+    dockerListener
 }
 
 /*
