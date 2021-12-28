@@ -36,13 +36,9 @@ async function updateWorkspaceFromContainer(status, name, ports, localWorkspaces
                 containers = [...containers, {name, status, ports}];
             } 
 
-            try{
-                localWorkspaces.put(
-                    {...workspace.doc, containers}
-                );
-            }catch(err){
-                console.log(err)
-            }
+            localWorkspaces.put(
+                {...workspace.doc, containers}
+            );
             break;
         }
     }    
@@ -50,32 +46,32 @@ async function updateWorkspaceFromContainer(status, name, ports, localWorkspaces
 
 const promisifyStream = (stream, workspacesDB) => new Promise((resolve, reject) => {
     stream.on('data', data => {
-        let json = JSON.parse(data.toString());        
-        let status = json.status;
-        let name = json.Actor.Attributes.name;
+        try{
+            let json = JSON.parse(data.toString());        
+            let status = json.status;
+            let name = json.Actor.Attributes.name;
 
-        if(json.status === 'destroy'){    
-            updateWorkspaceFromContainer(status, name, null, workspacesDB)
-            console.log({
-                status,
-                name
-            });
-        }
-        else if(json.status === 'start'){ 
-            try{
+            if(json.status === 'destroy'){    
+                await updateWorkspaceFromContainer(status, name, null, workspacesDB)
+                console.log({
+                    status,
+                    name
+                });
+            }
+            else if(json.status === 'start'){ 
                 docker.container.get(json.id).status().then(container => {
                     const ports = getPorts(container.data.NetworkSettings.Ports) 
-                    updateWorkspaceFromContainer(container.data.State.Status, name, ports, workspacesDB)
+                    await updateWorkspaceFromContainer(container.data.State.Status, name, ports, workspacesDB)
                     console.log({
                         status: container.data.State.Status,
                         name: container.data.Name,
                         ports
                     })
                 });
-            }catch(err){
-                console.log(err)
-            }
-        }        
+            }        
+        }catch(err){
+            console.log(err);
+        }
     })
     stream.on('end', resolve)
     stream.on('error', reject)
