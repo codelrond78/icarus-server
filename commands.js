@@ -43,23 +43,24 @@ function createWorkspace(name, specification, raw){
     }
 }
 
-function run(name, db){
+async function run(name, db){
     const cmd = spawn("docker-compose", ["-f", `/workspaces/${name}/docker-compose.yaml`, "up", "-d"]);
-    db.post({
+    await db.post({
         line: {
             type: "input",
             text: `docker-compose -f /workspaces/${name} up -d`
     }})
-    cmd.stdout.on("data", data => {
+    cmd.stdout.on("data", async data => {
         console.log(`stdout: ${data}`);
-        db.post({
+        await db.post({
             line: {
                 type: "output",
                 text: `${data}`
         }});
     }); 
-    cmd.stderr.on("data", data => {
-        db.post({
+    cmd.stderr.on("data", async data => {
+        console.log(data);
+        await db.post({
             line: {
                 type: "output",
                 text: `${data}`
@@ -67,22 +68,24 @@ function run(name, db){
     });
 }
 
-function stop(name, db){
+async function stop(name, db){
     const cmd = spawn("docker-compose", ["-f", `/workspaces/${name}/docker-compose.yaml`, "down"]);
-    db.post({
+    await db.post({
         line: {
             type: "input",
             text: `docker-compose -f /workspaces/${name} down`
     }})
-    cmd.stdout.on("data", data => {
-        db.post({
+    cmd.stdout.on("data", async data => {
+        console.log(data);
+        await db.post({
             line: {
                 type: "output",
                 text: `${data}`
         }});
     }); 
-    cmd.stderr.on("data", data => {
-        db.post({
+    cmd.stderr.on("data", async data => {
+        console.log(data);
+        await db.post({
             line: {
                 type: "output",
                 text: `${data}`

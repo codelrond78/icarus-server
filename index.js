@@ -29,46 +29,54 @@ router.get('/', (ctx, next) => {
     ctx.body = 'Icarus!';
 })
 .put('/api/workspace/:name/run', async (ctx, next) => {
-    const name = ctx.request.params.name;
-    run(name, remoteLog);
-    ctx.body = {"status": "starting"};
+    try{
+        const name = ctx.request.params.name;
+        await run(name, remoteLog);
+        ctx.body = {"status": "starting"};
+    }catch(err){
+        console.log('error', err);
+        ctx.body = {"error": err};
+    }   
 })
 .put('/api/workspace/:name/stop', async (ctx, next) => {
-    const name = ctx.request.params.name;
-    stop(name, remoteLog);
-    ctx.body = {"status": "stopping"};
+    try{
+        const name = ctx.request.params.name;
+        await stop(name, remoteLog);
+        ctx.body = {"status": "stopping"};
+    }catch(err){
+        console.log('error', err);
+        ctx.body = {"error": err};
+    }   
 })
 .put('/api/workspaces/:name', async (ctx, next) => {
-    const name = ctx.request.params.name;
-    const description = ctx.request.body.description;
-    const specification = yaml.load(ctx.request.body.specification);
-    
-    updateWorkspace(name, specification, ctx.request.body.specification);
-    doc = {
-        "line": {
-            "type": "input",
-            "text": `update-workspace ${name}`
+    try{
+        const name = ctx.request.params.name;
+        const description = ctx.request.body.description;
+        const specification = yaml.load(ctx.request.body.specification);
+        const raw = ctx.request.body.specification;
+        updateWorkspace(name, specification, ctx.request.body.specification);
+        doc = {
+            "line": {
+                "type": "input",
+                "text": `update-workspace ${name}`
+            }
         }
-    }
-    await remoteLog.post(doc);
-    w = await localWorkspaces.get(name);
-    await localWorkspaces.put({...w, description, specification});
-    ctx.body = {put: 'ok'};
-/*        _id: name,
-        _rev: w._rev,
-        type: "workspace",
-        description: description,
-        specification: specification,
-        status: w.status,
-        containers: w.containers
-    });*/
+        await remoteLog.post(doc);
+        w = await localWorkspaces.get(name);
+        await localWorkspaces.put({...w, description, specification: raw});
+        ctx.body = {put: 'ok'};
+    }catch(err){
+        console.log('error', err);
+        ctx.body = {"error": err};
+    }   
 })
 .post('/api/workspaces/:name', async (ctx, next) => {
     try{
         const name = ctx.request.params.name;
         const description = ctx.request.body.description;
         const specification = yaml.load(ctx.request.body.specification);
-        
+        const raw = ctx.request.body.specification;
+
         createWorkspace(name, specification, ctx.request.body.specification);       
         await remoteLog.post({
             "line": {
@@ -80,7 +88,7 @@ router.get('/', (ctx, next) => {
             _id: name, 
             type: "workspace",
             description, 
-            specification, 
+            specification: raw, 
             status: '-', 
             containers: []
         });
@@ -95,7 +103,6 @@ app
   .use(router.routes())
   .use(router.allowedMethods());
 
-console.log('start docker event listener...');
 dockerListener()
 
 console.log('listening on 3001...')

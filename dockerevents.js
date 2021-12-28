@@ -65,7 +65,7 @@ const promisifyStream = (stream, workspacesDB) => new Promise((resolve, reject) 
             try{
                 docker.container.get(json.id).status().then(container => {
                     const ports = getPorts(container.data.NetworkSettings.Ports) 
-                    updateWorkspaceFromContainer(status, name, ports, workspacesDB)
+                    updateWorkspaceFromContainer(container.data.State.Status, name, ports, workspacesDB)
                     console.log({
                         status: container.data.State.Status,
                         name: container.data.Name,
@@ -82,6 +82,7 @@ const promisifyStream = (stream, workspacesDB) => new Promise((resolve, reject) 
 })
 
 function dockerListener(workspacesDB){
+    console.log('start docker event listener...');
     docker.events({
         since: ((new Date().getTime() / 1000) - 60).toFixed(0)
     })
@@ -92,21 +93,3 @@ function dockerListener(workspacesDB){
 module.exports = {
     dockerListener
 }
-
-/*
-const localWorkspaces = new PouchDB('localWorkspaces');
-const remoteWorkspaces = new PouchDB(`http://admin:123@couchdb:5984/workspaces`)
-
-localWorkspaces.sync(remoteWorkspaces, {
-    live: true,
-    retry: true,
-    filter: 'example/myWorkspaces',
-}).on('change', function (change) {
-    console.log(change)
-}).on('error', function (err) {
-    console.log('err en log:', err)
-});
-
-console.log('comenzamos')
-f(localWorkspaces)
-*/
