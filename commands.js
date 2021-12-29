@@ -5,11 +5,12 @@ const { logInputLine, logOutputLine} = require("./logdatabase");
     
 const WORKSPACES_PATH = '/workspaces';
 
+/*
 function directoriesInDIrectory(pth){
     return fs.readdirSync(pth, { withFileTypes: true })
     .filter((item) => item.isDirectory())
     .map((item) => item.name);
-}
+}*/
 
 function updateWorkspace(name, specification, raw){
 
@@ -20,12 +21,13 @@ function updateWorkspace(name, specification, raw){
           return
         }
     });
+    /*
     const dirs = directoriesInDIrectory(myPath);
     for(let name of Object.keys(specification.services)){
         if(!dirs.includes(name)) {
             fs.mkdirSync(path.join(myPath, name));
         }   
-    }
+    }*/
 }
 
 
@@ -39,9 +41,9 @@ function createWorkspace(name, specification, raw){
           return
         }
     });
-    for(let name of Object.keys(specification.services)){
+    /*for(let name of Object.keys(specification.services)){
         fs.mkdirSync(path.join(myPath, name));
-    }
+    }*/
 }
 
 async function command(cmd, args, db){
