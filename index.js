@@ -103,7 +103,7 @@ app
   .use(router.routes())
   .use(router.allowedMethods());
 
-dockerListener()
+dockerListener(localWorkspaces);
 
 console.log('listening on 3001...')
 app.listen(3001);

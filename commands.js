@@ -51,6 +51,7 @@ async function run(name, db){
             text: `docker-compose -f /workspaces/${name} up -d`
     }})
     cmd.stdout.on("data", async data => {
+        data = data.toString();
         console.log(`stdout: ${data}`);
         await db.post({
             line: {
@@ -59,7 +60,8 @@ async function run(name, db){
         }});
     }); 
     cmd.stderr.on("data", async data => {
-        console.log(data);
+        data = data.toString();
+        console.log(`stderr: ${data}`);
         await db.post({
             line: {
                 type: "output",
@@ -76,7 +78,8 @@ async function stop(name, db){
             text: `docker-compose -f /workspaces/${name} down`
     }})
     cmd.stdout.on("data", async data => {
-        console.log(data);
+        data = data.toString();
+        console.log(`stdout: ${data}`);
         await db.post({
             line: {
                 type: "output",
@@ -84,7 +87,8 @@ async function stop(name, db){
         }});
     }); 
     cmd.stderr.on("data", async data => {
-        console.log(data);
+        data = data.toString();
+        console.log(`stderr: ${data}`);
         await db.post({
             line: {
                 type: "output",

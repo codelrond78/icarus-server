@@ -9,12 +9,14 @@ content-type: application/json
 }
 
 ###
+PUT http://localhost:3001/api/workspace/{{workspace}}/run HTTP/1.1
+
+###
+
 PUT http://localhost:3001/api/workspace/{{workspace}}/stop HTTP/1.1
 
 ###
-PUT http://localhost:3001/api/workspace/{{workspace}}/start HTTP/1.1
 
-###
 PUT http://localhost:3001/api/workspaces/{{workspace}} HTTP/1.1
 content-type: application/json
 

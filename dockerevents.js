@@ -5,6 +5,7 @@ const docker = new Docker({ socketPath: '/var/run/docker.sock' })
 
 function getPorts(raw){
     let ports = new Set();
+    console.log(raw)
     for (let [key, value] of Object.entries(raw)) {
         for(let port of value){
             ports.add(port.HostPort)
@@ -45,7 +46,7 @@ async function updateWorkspaceFromContainer(status, name, ports, localWorkspaces
 }
 
 const promisifyStream = (stream, workspacesDB) => new Promise((resolve, reject) => {
-    stream.on('data', data => {
+    stream.on('data', async data => {
         try{
             let json = JSON.parse(data.toString());        
             let status = json.status;
@@ -59,7 +60,17 @@ const promisifyStream = (stream, workspacesDB) => new Promise((resolve, reject) 
                 });
             }
             else if(json.status === 'start'){ 
-                docker.container.get(json.id).status().then(container => {
+                let container = await docker.container.get(json.id).status();
+                console.log(container);
+                const ports = getPorts(container.data.NetworkSettings.Ports);
+                await updateWorkspaceFromContainer(container.data.State.Status, name, ports, workspacesDB)
+                console.log({
+                    status: container.data.State.Status,
+                    name: container.data.Name,
+                    ports
+                })
+                /*
+                docker.container.get(json.id).status().then(async container => {
                     const ports = getPorts(container.data.NetworkSettings.Ports) 
                     await updateWorkspaceFromContainer(container.data.State.Status, name, ports, workspacesDB)
                     console.log({
@@ -68,6 +79,7 @@ const promisifyStream = (stream, workspacesDB) => new Promise((resolve, reject) 
                         ports
                     })
                 });
+                */
             }        
         }catch(err){
             console.log(err);
