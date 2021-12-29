@@ -7,8 +7,10 @@ function getPorts(raw){
     let ports = new Set();
     console.log(raw)
     for (let [key, value] of Object.entries(raw)) {
-        for(let port of value){
-            ports.add(port.HostPort)
+        if(value !== null){
+            for(let port of value){
+                ports.add(port.HostPort)
+            }
         }
     }
     return Array.from(ports);
