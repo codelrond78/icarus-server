@@ -46,7 +46,7 @@ function createWorkspace(name, specification, raw){
 
 async function command(cmd, args, db){
     const line = cmd + ' ' + args.join(" ");
-    const cmd = spawn(cmd, args);
+    cmd = spawn(cmd, args);
     await logInputLine(line, db)
     cmd.stdout.on("data", async data => {
         data = data.toString();
