@@ -44,9 +44,10 @@ function createWorkspace(name, specification, raw){
     }
 }
 
-async function run(name, db){
-    const cmd = spawn("docker-compose", ["-f", `/workspaces/${name}/docker-compose.yaml`, "up", "-d"]);
-    await logInputLine(`docker-compose -f /workspaces/${name} up -d`, db)
+async function command(cmd, args, db){
+    const line = cmd + ' ' + args.join(" ");
+    const cmd = spawn(cmd, args);
+    await logInputLine(line, db)
     cmd.stdout.on("data", async data => {
         data = data.toString();
         console.log(`stdout: ${data}`);
@@ -59,7 +60,31 @@ async function run(name, db){
     });
 }
 
+async function run(name, db){
+    await command("docker-compose",
+                  ["-f", `/workspaces/${name}/docker-compose.yaml`, "up", "-d"],
+                  db);
+    /*
+    const cmd = spawn("docker-compose", ["-f", `/workspaces/${name}/docker-compose.yaml`, "up", "-d"]);
+    await logInputLine(`docker-compose -f /workspaces/${name} up -d`, db)
+    cmd.stdout.on("data", async data => {
+        data = data.toString();
+        console.log(`stdout: ${data}`);
+        await logOutputLine(data, db)
+    }); 
+    cmd.stderr.on("data", async data => {
+        data = data.toString();
+        console.log(`stderr: ${data}`);
+        await logOutputLine(data, db)
+    });
+    */
+}
+
 async function stop(name, db){
+    await command("docker-compose",
+                  ["-f", `/workspaces/${name}/docker-compose.yaml`, "down"],
+                  db);
+    /*
     const cmd = spawn("docker-compose", ["-f", `/workspaces/${name}/docker-compose.yaml`, "down"]);
     await logInputLine(`docker-compose -f /workspaces/${name} down`, db)
     cmd.stdout.on("data", async data => {
@@ -72,6 +97,7 @@ async function stop(name, db){
         console.log(`stderr: ${data}`);
         await logOutputLine(data, db);
     });
+    */
 }
 
 module.exports = {

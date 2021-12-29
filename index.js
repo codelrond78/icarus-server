@@ -96,7 +96,7 @@ router.get('/', (ctx, next) => {
             type: "workspace",
             description, 
             specification: raw, 
-            status: '-', 
+            //status: '-', 
             containers: []
         });
         ctx.body = {post: 'ok'};
