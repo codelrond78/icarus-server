@@ -2,7 +2,6 @@ const Koa = require('koa');
 const bodyParser = require('koa-bodyparser');
 const Router = require('koa-router');
 const PouchDB = require('pouchdb');
-const yaml = require('js-yaml');
 const {run, stop} = require('./commands');
 const {dockerListener} = require('./dockerevents');
 
