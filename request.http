@@ -1,13 +1,5 @@
 @workspace = yopiyopi
 
-POST http://localhost:3001/api/workspaces/{{workspace}} HTTP/1.1
-content-type: application/json
-
-{
-  "description": "#yopi es mi mejor amigo",
-  "specification": "#yopi es mi mejor amigo\nversion: \"3\"\nservices:\n  db:\n    image: mongo\n"
-}
-
 ###
 PUT http://localhost:3001/api/workspace/{{workspace}}/run HTTP/1.1
 
@@ -23,12 +15,3 @@ PUT http://localhost:3001/api/workspace/{{workspace}}/stop HTTP/1.1
   "specification": "#yopi es mi mejor amigo\nversion: \"3\"\nservices:\n  db:\n    image: mongo\n"
 }
 
-###
-
-PUT http://localhost:3001/api/workspaces/{{workspace}} HTTP/1.1
-content-type: application/json
-
-{
-  "description": "#yopi yujuuu!!",
-  "specification": "#yopi yujuuu!!\nversion: \"3\"\nservices:\n  db:\n    image: mongo\n"
-}
