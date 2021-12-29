@@ -46,9 +46,9 @@ function createWorkspace(name, specification, raw){
     }*/
 }
 
-async function command(cmd, args, db){
-    const line = cmd + ' ' + args.join(" ");
-    cmd = spawn(cmd, args);
+async function command(cmd, name, specification, db){
+    cmd = spawn("./down.sh", [], { env: { YAML: specification, NAME: name }})
+
     await logInputLine(line, db)
     cmd.stdout.on("data", async data => {
         data = data.toString();
@@ -62,43 +62,19 @@ async function command(cmd, args, db){
     });
 }
 
-async function run(name, db){
-    await command("docker-compose",
+async function run(name, specification, db){
+    await command('./up.sh', name, specification, db)
+    /*await command("docker-compose",
                   ["-f", `/workspaces/${name}/docker-compose.yaml`, "up", "-d"],
                   db);
-    /*
-    const cmd = spawn("docker-compose", ["-f", `/workspaces/${name}/docker-compose.yaml`, "up", "-d"]);
-    await logInputLine(`docker-compose -f /workspaces/${name} up -d`, db)
-    cmd.stdout.on("data", async data => {
-        data = data.toString();
-        console.log(`stdout: ${data}`);
-        await logOutputLine(data, db)
-    }); 
-    cmd.stderr.on("data", async data => {
-        data = data.toString();
-        console.log(`stderr: ${data}`);
-        await logOutputLine(data, db)
-    });
     */
 }
 
 async function stop(name, db){
-    await command("docker-compose",
+    await command('./down.sh', name, specification, db)
+    /*await command("docker-compose",
                   ["-f", `/workspaces/${name}/docker-compose.yaml`, "down"],
                   db);
-    /*
-    const cmd = spawn("docker-compose", ["-f", `/workspaces/${name}/docker-compose.yaml`, "down"]);
-    await logInputLine(`docker-compose -f /workspaces/${name} down`, db)
-    cmd.stdout.on("data", async data => {
-        data = data.toString();
-        console.log(`stdout: ${data}`);
-        await logOutputLine(data, db);
-    }); 
-    cmd.stderr.on("data", async data => {
-        data = data.toString();
-        console.log(`stderr: ${data}`);
-        await logOutputLine(data, db);
-    });
     */
 }
 

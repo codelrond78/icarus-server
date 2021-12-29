@@ -32,7 +32,8 @@ router.get('/', (ctx, next) => {
 .put('/api/workspace/:name/run', async (ctx, next) => {
     try{
         const name = ctx.request.params.name;
-        await run(name, remoteLog);
+        const specification = ctx.request.body.specification;
+        await run(name, specification, remoteLog);
         ctx.body = {"status": "starting"};
     }catch(err){
         console.log('error', err);
@@ -42,7 +43,8 @@ router.get('/', (ctx, next) => {
 .put('/api/workspace/:name/stop', async (ctx, next) => {
     try{
         const name = ctx.request.params.name;
-        await stop(name, remoteLog);
+        const specification = ctx.request.body.specification;
+        await stop(name, specification, remoteLog);
         ctx.body = {"status": "stopping"};
     }catch(err){
         console.log('error', err);
