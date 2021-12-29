@@ -1,6 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const { spawn } = require("child_process");
+const { logInputLine, logOutputLine} = require("./logdatabase");
     
 const WORKSPACES_PATH = '/workspaces';
 
@@ -45,55 +46,31 @@ function createWorkspace(name, specification, raw){
 
 async function run(name, db){
     const cmd = spawn("docker-compose", ["-f", `/workspaces/${name}/docker-compose.yaml`, "up", "-d"]);
-    await db.post({
-        line: {
-            type: "input",
-            text: `docker-compose -f /workspaces/${name} up -d`
-    }})
+    await logInputLine(`docker-compose -f /workspaces/${name} up -d`, db)
     cmd.stdout.on("data", async data => {
         data = data.toString();
         console.log(`stdout: ${data}`);
-        await db.post({
-            line: {
-                type: "output",
-                text: `${data}`
-        }});
+        await logOutputLine(data, db)
     }); 
     cmd.stderr.on("data", async data => {
         data = data.toString();
         console.log(`stderr: ${data}`);
-        await db.post({
-            line: {
-                type: "output",
-                text: `${data}`
-        }});
+        await logOutputLine(data, db)
     });
 }
 
 async function stop(name, db){
     const cmd = spawn("docker-compose", ["-f", `/workspaces/${name}/docker-compose.yaml`, "down"]);
-    await db.post({
-        line: {
-            type: "input",
-            text: `docker-compose -f /workspaces/${name} down`
-    }})
+    await logInputLine(`docker-compose -f /workspaces/${name} down`, db)
     cmd.stdout.on("data", async data => {
         data = data.toString();
         console.log(`stdout: ${data}`);
-        await db.post({
-            line: {
-                type: "output",
-                text: `${data}`
-        }});
+        await logOutputLine(data, db);
     }); 
     cmd.stderr.on("data", async data => {
         data = data.toString();
         console.log(`stderr: ${data}`);
-        await db.post({
-            line: {
-                type: "output",
-                text: `${data}`
-        }});
+        await logOutputLine(data, db);
     });
 }
 

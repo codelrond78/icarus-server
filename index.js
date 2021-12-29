@@ -5,6 +5,7 @@ const PouchDB = require('pouchdb');
 const yaml = require('js-yaml');
 const {run, stop, createWorkspace, updateWorkspace} = require('./commands');
 const {dockerListener} = require('./dockerevents');
+const { logInputLine, logOutputLine} = require("./logdatabase");
 
 const password = '123';
 const remoteLog = new PouchDB(`http://admin:${password}@couchdb:5984/icarus_log`);
@@ -55,6 +56,7 @@ router.get('/', (ctx, next) => {
         const specification = yaml.load(ctx.request.body.specification);
         const raw = ctx.request.body.specification;
         updateWorkspace(name, specification, ctx.request.body.specification);
+        /*
         doc = {
             "line": {
                 "type": "input",
@@ -62,6 +64,8 @@ router.get('/', (ctx, next) => {
             }
         }
         await remoteLog.post(doc);
+        */
+        await logInputLine(`update-workspace ${name}`, remoteLog);
         w = await localWorkspaces.get(name);
         await localWorkspaces.put({...w, description, specification: raw});
         ctx.body = {put: 'ok'};
@@ -78,12 +82,15 @@ router.get('/', (ctx, next) => {
         const raw = ctx.request.body.specification;
 
         createWorkspace(name, specification, ctx.request.body.specification);       
+        /*
         await remoteLog.post({
             "line": {
                 "type": "input",
                 "text": `create-workspace ${name}`
             }
         });
+        */
+        await logInputLine(`create-workspace ${name}`, remoteLog);
         await localWorkspaces.post({
             _id: name, 
             type: "workspace",
