@@ -2,15 +2,16 @@ const { spawn } = require("child_process");
 const { logInputLine, logOutputLine} = require("./logdatabase");
     
 async function command(cmd, name, specification, db){
-    cmd = spawn(cmd, [], { env: { YAML: specification, NAME: name }})
+    cmd_ = spawn(cmd, [], { env: { YAML: specification, NAME: name }})
 
-    await logInputLine(line, db)
-    cmd.stdout.on("data", async data => {
+    //console.log('llego', cmd, specification, name)
+    await logInputLine(cmd, db)
+    cmd_.stdout.on("data", async data => {
         data = data.toString();
         console.log(`stdout: ${data}`);
         await logOutputLine(data, db)
     }); 
-    cmd.stderr.on("data", async data => {
+    cmd_.stderr.on("data", async data => {
         data = data.toString();
         console.log(`stderr: ${data}`);
         await logOutputLine(data, db)

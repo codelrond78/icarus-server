@@ -1,6 +1,6 @@
 #!/bin/bash
 
-PATH=/workspaces/$NAME
-cd $PATH
+DIR=/workspaces/$NAME
+cd $DIR
 
 echo "$YAML" | docker-compose -f - down

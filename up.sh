@@ -1,7 +1,8 @@
 #!/bin/bash
 
-PATH=/workspaces/$NAME
-mkdir -p $PATH
-cd $PATH
+DIR=/workspaces/$NAME
+mkdir -p $DIR
+cd $DIR
+echo $DIR
 
 echo "$YAML" | docker-compose -f - up -d
