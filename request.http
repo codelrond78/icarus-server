@@ -1,50 +1,19 @@
-GET  http://localhost:5000/api/workspaces HTTP/1.1
+@workspace = yopiyopi
 
 ###
-GET  http://localhost:5000/api/workspaces/status HTTP/1.1
-
-###
-POST http://localhost:5000/api/workspaces/abc HTTP/1.1
-
-version: "3.9"  # optional since v1.27.0
-services:
-  db:
-    image: mongo
-    ports: ["27017"]
-
-###
-
-POST http://localhost:5000/api/workspace/abc/fork/xyz HTTP/1.1
-
-###
-
-PUT http://localhost:5000/api/workspace/abc/start HTTP/1.1
-
-###
-
-PUT http://localhost:5000/api/workspace/abc/stop HTTP/1.1
-
-### 3001 version node
-
-POST http://localhost:3001/api/workspaces/winkiv2 HTTP/1.1
+PUT http://localhost:3001/api/workspace/{{workspace}}/run HTTP/1.1
 content-type: application/json
 
 {
-  "description": "winki es mi amigo",
-  "specification": "version: \"3\"\nservices:\n  db:\n    image: mongo\n"
+  "specification": "#yopi es mi mejor amigo\nversion: \"3\"\nservices:\n  db:\n    image: mongo\n"
 }
 
 ###
-PUT http://localhost:3001/api/workspace/winkiv2/stop HTTP/1.1
 
-###
-PUT http://localhost:3001/api/workspace/winkiv2/start HTTP/1.1
-
-###
-PUT http://localhost:3001/api/workspaces/winkiv2 HTTP/1.1
+PUT http://localhost:3001/api/workspace/{{workspace}}/stop HTTP/1.1
 content-type: application/json
 
 {
-  "description": "winki yujuuu!!",
-  "specification": "version: \"3\"\nservices:\n  db:\n    image: mongo\n"
+  "specification": "#yopi es mi mejor amigo\nversion: \"3\"\nservices:\n  db:\n    image: mongo\n"
 }
+

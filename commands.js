@@ -1,98 +1,31 @@
-const fs = require('fs');
-const path = require('path');
 const { spawn } = require("child_process");
+const { logInputLine, logOutputLine} = require("./logdatabase");
     
-const WORKSPACES_PATH = '/workspaces';
+async function command(cmd, name, specification, db){
+    cmd_ = spawn(cmd, [], { env: { YAML: specification, NAME: name }})
 
-function directoriesInDIrectory(pth){
-    return fs.readdirSync(pth, { withFileTypes: true })
-    .filter((item) => item.isDirectory())
-    .map((item) => item.name);
-}
-
-function updateWorkspace(name, specification, raw){
-
-    myPath = path.join(WORKSPACES_PATH, name);
-    fs.writeFileSync(path.join(myPath, 'docker-compose.yaml'), raw, err => {
-        if (err) {
-          console.error(err)
-          return
-        }
-    });
-    const dirs = directoriesInDIrectory(myPath);
-    for(let name of Object.keys(specification.services)){
-        if(!dirs.includes(name)) {
-            fs.mkdirSync(path.join(myPath, name));
-        }   
-    }
-}
-
-
-function createWorkspace(name, specification, raw){
-
-    myPath = path.join(WORKSPACES_PATH, name);
-    fs.mkdirSync(myPath);
-    fs.writeFileSync(path.join(myPath, 'docker-compose.yaml'), raw, err => {
-        if (err) {
-          console.error(err)
-          return
-        }
-    });
-    for(let name of Object.keys(specification.services)){
-        fs.mkdirSync(path.join(myPath, name));
-    }
-}
-
-function run(name, db){
-    const cmd = spawn("docker-compose", ["-f", `/workspaces/${name}/docker-compose.yaml`, "up", "-d"]);
-    db.post({
-        line: {
-            type: "input",
-            text: `docker-compose -f /workspaces/${name} up -d`
-    }})
-    cmd.stdout.on("data", data => {
+    await logInputLine(cmd + ' ' + name, db)
+    cmd_.stdout.on("data", async data => {
+        data = data.toString();
         console.log(`stdout: ${data}`);
-        db.post({
-            line: {
-                type: "output",
-                text: `${data}`
-        }});
+        await logOutputLine(data, db)
     }); 
-    cmd.stderr.on("data", data => {
-        db.post({
-            line: {
-                type: "output",
-                text: `${data}`
-        }});
+    cmd_.stderr.on("data", async data => {
+        data = data.toString();
+        console.log(`stderr: ${data}`);
+        await logOutputLine(data, db)
     });
 }
 
-function stop(name, db){
-    const cmd = spawn("docker-compose", ["-f", `/workspaces/${name}/docker-compose.yaml`, "down"]);
-    db.post({
-        line: {
-            type: "input",
-            text: `docker-compose -f /workspaces/${name} down`
-    }})
-    cmd.stdout.on("data", data => {
-        db.post({
-            line: {
-                type: "output",
-                text: `${data}`
-        }});
-    }); 
-    cmd.stderr.on("data", data => {
-        db.post({
-            line: {
-                type: "output",
-                text: `${data}`
-        }});
-    });
+async function run(name, specification, db){
+    await command('./up.sh', name, specification, db)
+}
+
+async function stop(name, specification, db){
+    await command('./down.sh', name, specification, db)
 }
 
 module.exports = {
     run,
-    stop,
-    createWorkspace,
-    updateWorkspace
+    stop
 }

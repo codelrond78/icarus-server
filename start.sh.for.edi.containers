@@ -1,23 +1,19 @@
 #!/bin/bash
 
+REPO="https://github.com/libgit2/libgit2"
 DIR="."
 
-cd /app/hello
+cd /tmp2/p1
 
-if [ -d "$DIR" ]
-then
-        if [ "$(ls -A $DIR)" ]; then
-           echo "Dir is not Empty"
-        else
-           echo "$DIR is Empty"
-           if [ -z ${REPO+x} ]; then 
-               echo "No repo given"
-           else 
-               git clone $REPO .
-           fi
-        fi
+if [ "$(ls -A $DIR)" ]; then
+    echo "Dir is not Empty"
 else
-        echo "Directory $DIR not found."
+    echo "$DIR is Empty"
+    if [ -z ${REPO+x} ]; then 
+        echo "No repo given"
+    else 
+        git clone $REPO .
+    fi
 fi
 
 code-server --auth password --bind-addr 0.0.0.0:8080 /app/hello
