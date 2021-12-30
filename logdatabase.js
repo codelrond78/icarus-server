@@ -1,10 +1,9 @@
 async function logLine(type, text, db){
     await db.post({
-        line: {
-            type,
-            text,
-            timestamp: JSON.stringify(new Date())
-    }});
+        type,
+        text,
+        timestamp: JSON.stringify(new Date())
+    });
 }
 
 async function logInputLine(line, db){
