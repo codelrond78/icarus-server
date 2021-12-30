@@ -5,7 +5,7 @@ const docker = new Docker({ socketPath: '/var/run/docker.sock' })
 
 function getPorts(raw){
     let ports = new Set();
-    console.log(raw)
+    
     for (let [key, value] of Object.entries(raw)) {
         if(value !== null){
             for(let port of value){
@@ -26,10 +26,8 @@ async function updateWorkspaceFromContainer(status, name, ports, localWorkspaces
         name = name.substring(1)
     }
 
-    for(let workspace of workspaces){
-        console.log('match?', name, workspace.id);
+    for(let workspace of workspaces){        
         if(name.startsWith(workspace.id)){
-            console.log(workspace)
             let containers = workspace.doc.containers.filter(function(c){ 
                 return c.name != name;
             });
@@ -63,7 +61,7 @@ const promisifyStream = (stream, workspacesDB) => new Promise((resolve, reject) 
             }
             else if(json.status === 'start'){ 
                 let container = await docker.container.get(json.id).status();
-                console.log(container);
+                
                 const ports = getPorts(container.data.NetworkSettings.Ports);
                 await updateWorkspaceFromContainer(container.data.State.Status, name, ports, workspacesDB)
                 console.log({

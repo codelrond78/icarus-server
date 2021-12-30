@@ -4,8 +4,7 @@ const { logInputLine, logOutputLine} = require("./logdatabase");
 async function command(cmd, name, specification, db){
     cmd_ = spawn(cmd, [], { env: { YAML: specification, NAME: name }})
 
-    //console.log('llego', cmd, specification, name)
-    await logInputLine(cmd, db)
+    await logInputLine(cmd + ' ' + name, db)
     cmd_.stdout.on("data", async data => {
         data = data.toString();
         console.log(`stdout: ${data}`);
