@@ -7,18 +7,7 @@ const {dockerListener} = require('./dockerevents');
 
 const password = '123';
 const remoteLog = new PouchDB(`http://admin:${password}@couchdb:5984/icarus_log`);
-const localWorkspaces = new PouchDB('localWorkspaces')
 const remoteWorkspaces = new PouchDB(`http://admin:${password}@couchdb:5984/workspaces`)
-
-localWorkspaces.sync(remoteWorkspaces, {
-    live: true,
-    retry: true,
-filter: 'example/myWorkspaces',
-}).on('change', function (change) {
-    console.log(change)
-}).on('error', function (err) {
-    console.log('err en log:', err)
-});
 
 const app = new Koa();
 const router = new Router();
@@ -54,7 +43,7 @@ app
   .use(router.routes())
   .use(router.allowedMethods());
 
-dockerListener(localWorkspaces);
+dockerListener(remoteWorkspaces);
 
 console.log('listening on 5000...')
 app.listen(5000);

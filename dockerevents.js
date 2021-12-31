@@ -16,8 +16,8 @@ function getPorts(raw){
     return Array.from(ports);
 }
 
-async function updateWorkspaceFromContainer(status, name, ports, localWorkspaces){
-    let workspaces = await localWorkspaces.allDocs({
+async function updateWorkspaceFromContainer(status, name, ports, db){
+    let workspaces = await db.allDocs({
         include_docs: true
     });
     workspaces = workspaces.rows;
@@ -37,7 +37,7 @@ async function updateWorkspaceFromContainer(status, name, ports, localWorkspaces
                 containers = [...containers, {name, status, ports}];
             } 
 
-            localWorkspaces.put(
+            db.put(
                 {...workspace.doc, containers}
             );
             break;
