@@ -9,7 +9,7 @@ function getPorts(raw){
     for (let [key, value] of Object.entries(raw)) {
         if(value !== null){
             for(let port of value){
-                ports.add(port.HostPort)
+                ports.add(key + ':' + port.HostPort)
             }
         }
     }
@@ -69,17 +69,6 @@ const promisifyStream = (stream, workspacesDB) => new Promise((resolve, reject) 
                     name: container.data.Name,
                     ports
                 })
-                /*
-                docker.container.get(json.id).status().then(async container => {
-                    const ports = getPorts(container.data.NetworkSettings.Ports) 
-                    await updateWorkspaceFromContainer(container.data.State.Status, name, ports, workspacesDB)
-                    console.log({
-                        status: container.data.State.Status,
-                        name: container.data.Name,
-                        ports
-                    })
-                });
-                */
             }        
         }catch(err){
             console.log(err);
