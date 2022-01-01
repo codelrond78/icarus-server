@@ -23,5 +23,8 @@
     "koa-router": "^10.1.1",
     "node-docker-api": "^1.1.22",
     "pouchdb": "^7.2.2"
+  },
+  "devDependencies": {
+    "eslint": "^8.6.0"
   }
 }
