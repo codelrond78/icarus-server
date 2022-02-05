@@ -25,7 +25,12 @@ async function stop(name, specification, db){
     await command('./down.sh', name, specification, db)
 }
 
+async function remove(name, specification, db){
+    await command('./delete.sh', name, specification, db)
+}
+
 module.exports = {
     run,
-    stop
+    stop,
+    remove
 }

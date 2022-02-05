@@ -2,7 +2,7 @@ const Koa = require('koa');
 const bodyParser = require('koa-bodyparser');
 const Router = require('koa-router');
 const PouchDB = require('pouchdb');
-const {run, stop} = require('./commands');
+const {run, stop, remove} = require('./commands');
 const {dockerListener} = require('./dockerevents');
 
 const password = '123';
@@ -37,7 +37,19 @@ router.get('/', (ctx, next) => {
         console.log('error', err);
         ctx.body = {"error": err};
     }   
-});
+})
+.put('/api/workspace/:name/delete', async (ctx, next) => {
+    try{
+        const name = ctx.request.params.name;
+        const specification = ctx.request.body.specification;
+        await remove(name, specification, remoteLog);
+        ctx.body = {"status": "deleting"};
+    }catch(err){
+        console.log('error', err);
+        ctx.body = {"error": err};
+    }   
+})
+;
 
 app
   .use(router.routes())
