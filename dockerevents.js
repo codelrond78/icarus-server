@@ -37,7 +37,7 @@ async function updateWorkspaceFromContainer(status, name, ports, db){
                 containers = [...containers, {name, status, ports}];
             } 
 
-            db.put(
+            await db.put(
                 {...workspace.doc, containers}
             );
             break;
