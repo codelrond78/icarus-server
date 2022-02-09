@@ -28,7 +28,10 @@ async function updateWorkspaceFromContainer(status, name, ports, db){
 
     for(let workspace of workspaces){        
         if(name.startsWith(workspace.id)){
-            let containers = workspace.doc.containers.filter(function(c){ 
+            console.log('***', workspace.id);
+            workspace = await db.get(workspace.id); //por alguna razón allDocs no me da el objeto actualizado. Ver abajo el force: true por si acaso
+            console.log('workspace', workspace);
+            let containers = workspace.containers.filter(function(c){ 
                 return c.name != name;
             });
             if(status === 'destroy'){
@@ -37,8 +40,10 @@ async function updateWorkspaceFromContainer(status, name, ports, db){
                 containers = [...containers, {name, status, ports}];
             } 
 
+            console.log('containers', containers, workspace.containers)
+
             await db.put(
-                {...workspace.doc, containers}
+                {...workspace, containers}, {force: true}
             );
             break;
         }
