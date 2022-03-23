@@ -1,7 +1,16 @@
 //const PouchDB = require('pouchdb');
 const {Docker} = require('node-docker-api');
+const {default: PQueue} = require('p-queue-es5');
+
+const queue = new PQueue({concurrency: 1});
 
 const docker = new Docker({ socketPath: '/var/run/docker.sock' })
+
+function makeTask(status, name, ports, db){
+    return async () => {
+        await queue.add(async () => await updateWorkspaceFromContainer(status, name, ports, db));
+    }
+}
 
 function getPorts(raw){
     let ports = new Set();
@@ -28,9 +37,8 @@ async function updateWorkspaceFromContainer(status, name, ports, db){
 
     for(let workspace of workspaces){        
         if(name.startsWith(workspace.id)){
-            console.log('***', workspace.id);
-            workspace = await db.get(workspace.id); //por alguna razón allDocs no me da el objeto actualizado. Ver abajo el force: true por si acaso
-            console.log('workspace', workspace);
+            workspace = await db.get(workspace.id); //por alguna razón allDocs no me da el objeto actualizado.
+
             let containers = workspace.containers.filter(function(c){ 
                 return c.name != name;
             });
@@ -43,7 +51,7 @@ async function updateWorkspaceFromContainer(status, name, ports, db){
             console.log('containers', containers, workspace.containers)
 
             await db.put(
-                {...workspace, containers}, {force: true}
+                {...workspace, containers}
             );
             break;
         }
@@ -58,7 +66,9 @@ const promisifyStream = (stream, workspacesDB) => new Promise((resolve, reject) 
             let name = json.Actor.Attributes.name;
 
             if(json.status === 'destroy'){    
-                await updateWorkspaceFromContainer(status, name, null, workspacesDB)
+                const task = makeTask(status, name, null, workspacesDB);
+                await task();
+                //await updateWorkspaceFromContainer(status, name, null, workspacesDB)
                 console.log({
                     status,
                     name
@@ -68,7 +78,9 @@ const promisifyStream = (stream, workspacesDB) => new Promise((resolve, reject) 
                 let container = await docker.container.get(json.id).status();
                 
                 const ports = getPorts(container.data.NetworkSettings.Ports);
-                await updateWorkspaceFromContainer(container.data.State.Status, name, ports, workspacesDB)
+                const task = makeTask(container.data.State.Status, name, ports, workspacesDB);
+                await task();
+                //await updateWorkspaceFromContainer(container.data.State.Status, name, ports, workspacesDB)
                 console.log({
                     status: container.data.State.Status,
                     name: container.data.Name,
